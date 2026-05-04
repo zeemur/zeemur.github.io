@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RuneScape Idle — Gielinor Awaits</title>
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c8a84b;
+  --gold-light: #f0d060;
+  --gold-dark: #8a6a1a;
+  --brown-dark: #1a1208;
+  --brown-mid: #2c1f0a;
+  --brown-ui: #3a2a10;
+  --brown-panel: #241800;
+  --brown-hover: #4a3820;
+  --green: #3a7a3a;
+  --green-bright: #4caf50;
+  --red: #8b1a1a;
+  --red-bright: #e53935;
+  --blue: #1a4a8b;
+  --blue-bright: #2196f3;
+  --text-primary: #e8d5a0;
+  --text-dim: #9a8050;
+  --border: #5a4010;
+  --border-gold: #8a6a20;
+  --xp-bar: #3a7a00;
+  --hp-bar: #8b0000;
+  --combat-bg: #12100a;
+  --skill-bg: #1e1508;
+  --shadow: 0 4px 20px rgba(0,0,0,0.8);
+  --font-title: 'Cinzel', serif;
+  --font-body: 'IM Fell English', serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--brown-dark);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at top, #2a1a05 0%, #1a1208 50%, #0d0a05 100%);
+  overflow-x: hidden;
+}
+
+/* ─── HEADER ─────────────────────────────────────────── */
+header {
+  background: linear-gradient(180deg, #0a0700 0%, var(--brown-panel) 100%);
+  border-bottom: 2px solid var(--gold-dark);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.9);
+}
+header h1 {
+  font-family: var(--font-title);
+  font-size: 22px;
+  color: var(--gold-light);
+  text-shadow: 0 0 15px rgba(200,168,75,0.5), 2px 2px 4px #000;
+  letter-spacing: 2px;
+}
+.header-stats {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.header-stat {
+  font-family: var(--font-title);
+  font-size: 12px;
+  color: var(--gold);
+  text-align: center;
+}
+.header-stat span {
+  display: block;
+  font-size: 16px;
+  color: var(--gold-light);
+}
+#gold-display {
+  color: var(--gold-light);
+  font-weight: 700;
+}
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.game-container {
+  display: grid;
+  grid-template-columns: 220px 1fr 260px;
+  grid-template-rows: auto 1fr;
+  min-height: calc(100vh - 54px);
+  gap: 0;
+}
+
+/* ─── SIDEBAR NAV ──────────────────────────────────────── */
+.sidebar {
+  background: linear-gradient(180deg, var(--brown-panel) 0%, var(--brown-dark) 100%);
+  border-right: 2px solid var(--border);
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nav-section-title {
+  font-family: var(--font-title);
+  font-size: 10px;
+  color: var(--gold-dark);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 8px 8px 4px;
+  border-bottom: 1px solid var(--border);
+  margin-top: 8px;
+}
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  transition: all 0.15s;
+  text-align: left;
+  width: 100%;
+}
+.nav-btn:hover {
+  background: var(--brown-hover);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+.nav-btn.active {
+  background: var(--brown-ui);
+  border-color: var(--gold-dark);
+  color: var(--gold-light);
+}
+.nav-btn .icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-btn .skill-lvl {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--gold);
+  font-family: var(--font-title);
+}
+
+/* ─── MAIN PANEL ──────────────────────────────────────── */
+.main-panel {
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--skill-bg);
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 40px,
+    rgba(255,255,255,0.01) 40px, rgba(255,255,255,0.01) 41px
+  );
+}
+
+/* ─── RIGHT PANEL ──────────────────────────────────────── */
+.right-panel {
+  background: linear-gradient(180deg, var(--brown-panel) 0%, var(--brown-dark) 100%);
+  border-left: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* ─── PANELS ──────────────────────────────────────────── */
+.panel {
+  display: none;
+}
+.panel.active {
+  display: block;
+}
+
+/* ─── UI CARD ─────────────────────────────────────────── */
+.ui-card {
+  background: var(--brown-ui);
+  border: 1px solid var(--border-gold);
+  border-radius: 4px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.ui-card-header {
+  background: linear-gradient(90deg, var(--brown-panel) 0%, var(--brown-mid) 100%);
+  border-bottom: 1px solid var(--border-gold);
+  padding: 8px 14px;
+  font-family: var(--font-title);
+  font-size: 13px;
+  color: var(--gold-light);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ui-card-body { padding: 12px 14px; }
+
+/* ─── XP BAR ─────────────────────────────────────────── */
+.xp-bar-wrapper {
+  margin: 6px 0;
+}
+.xp-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 3px;
+}
+.xp-bar-bg {
+  height: 8px;
+  background: #0a0800;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3a6a00, #5ab000);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 6px rgba(80,180,0,0.4);
+}
+
+/* ─── ACTION GRID ─────────────────────────────────────── */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+.action-btn {
+  background: var(--brown-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  position: relative;
+  overflow: hidden;
+}
+.action-btn:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: var(--brown-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.action-btn.doing {
+  border-color: var(--gold-light);
+  background: linear-gradient(135deg, var(--brown-hover), var(--brown-mid));
+  box-shadow: 0 0 12px rgba(200,168,75,0.3);
+}
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.action-btn .a-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold-light);
+  margin-bottom: 4px;
+}
+.action-btn .a-req {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.action-btn .a-reward {
+  font-size: 11px;
+  color: var(--green-bright);
+  margin-top: 3px;
+}
+.action-btn .a-icon { font-size: 22px; margin-bottom: 4px; }
+.action-progress {
+  position: absolute;
+  bottom: 0; left: 0;
+  height: 3px;
+  background: var(--gold);
+  transition: width 0.1s linear;
+  width: 0%;
+}
+
+/* ─── ACTIVE ACTION ───────────────────────────────────── */
+.active-action-card {
+  background: linear-gradient(135deg, #1a1205, #2a1f08);
+  border: 1px solid var(--gold-dark);
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 12px;
+  display: none;
+}
+.active-action-card.visible { display: block; }
+.active-action-card h3 {
+  font-family: var(--font-title);
+  font-size: 13px;
+  color: var(--gold-light);
+  margin-bottom: 10px;
+}
+.big-progress-bg {
+  height: 22px;
+  background: #0a0800;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.big-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2a5000, var(--gold), #c8a84b);
+  transition: width 0.1s linear;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.progress-pct {
+  font-size: 11px;
+  color: #fff;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px #000;
+}
+.stop-btn {
+  background: var(--red);
+  border: 1px solid #6a0000;
+  color: #ffaaaa;
+  padding: 5px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 12px;
+  margin-top: 8px;
+  transition: all 0.15s;
+}
+.stop-btn:hover { background: var(--red-bright); color: #fff; }
+
+/* ─── SKILL OVERVIEW ─────────────────────────────────── */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.skill-box {
+  background: var(--brown-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.skill-box:hover {
+  border-color: var(--gold);
+  background: var(--brown-hover);
+}
+.skill-box .s-icon { font-size: 24px; margin-bottom: 4px; }
+.skill-box .s-name { font-size: 11px; color: var(--text-dim); font-family: var(--font-title); letter-spacing: 0.5px; }
+.skill-box .s-level {
+  font-size: 18px;
+  font-family: var(--font-title);
+  color: var(--gold-light);
+  font-weight: 700;
+}
+.skill-box .s-xp { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* ─── COMBAT ──────────────────────────────────────────── */
+.combat-arena {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.combatant {
+  background: var(--brown-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px;
+  text-align: center;
+}
+.combatant.player { border-color: var(--blue); }
+.combatant.monster { border-color: var(--red); }
+.combatant-icon { font-size: 40px; margin-bottom: 8px; }
+.combatant-name {
+  font-family: var(--font-title);
+  font-size: 13px;
+  color: var(--gold-light);
+  margin-bottom: 8px;
+}
+.hp-bar-bg {
+  height: 14px;
+  background: #1a0000;
+  border: 1px solid #4a0000;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.hp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b0000, #e53935);
+  transition: width 0.3s ease;
+}
+.hp-bar-fill.player { background: linear-gradient(90deg, #006000, #4caf50); }
+.hp-text { font-size: 11px; color: var(--text-dim); }
+.vs-text {
+  font-family: var(--font-title);
+  font-size: 20px;
+  color: var(--gold-dark);
+  text-align: center;
+}
+.combat-log {
+  background: #0a0800;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+  height: 140px;
+  overflow-y: auto;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.combat-log p { margin: 2px 0; }
+.log-dmg-player { color: #7ec8e3; }
+.log-dmg-monster { color: #e37c7c; }
+.log-event { color: var(--gold); font-style: italic; }
+.log-loot { color: var(--green-bright); }
+.monster-select {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.monster-btn {
+  background: var(--brown-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  text-align: center;
+  transition: all 0.15s;
+}
+.monster-btn:hover { border-color: var(--red-bright); background: #2a1010; }
+.monster-btn.selected { border-color: var(--red-bright); background: #1a0808; }
+.monster-btn .m-icon { font-size: 28px; display: block; margin-bottom: 4px; }
+.monster-btn .m-name { font-size: 12px; color: var(--gold-light); }
+.monster-btn .m-level { font-size: 11px; color: var(--text-dim); }
+
+/* ─── INVENTORY / BANK ───────────────────────────────── */
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 6px;
+}
+.inv-slot {
+  background: var(--brown-panel);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 8px 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-height: 68px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.inv-slot:hover { border-color: var(--gold); background: var(--brown-hover); }
+.inv-slot .i-icon { font-size: 22px; }
+.inv-slot .i-name { font-size: 9px; color: var(--text-dim); text-align: center; line-height: 1.2; }
+.inv-slot .i-qty { font-size: 11px; color: var(--gold-light); font-weight: bold; }
+
+/* ─── SHOP ────────────────────────────────────────────── */
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.shop-item {
+  background: var(--brown-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.shop-item .si-icon { font-size: 28px; }
+.shop-item .si-name { font-family: var(--font-title); font-size: 12px; color: var(--gold-light); }
+.shop-item .si-desc { font-size: 11px; color: var(--text-dim); flex: 1; }
+.shop-item .si-cost { font-size: 12px; color: var(--gold); }
+.buy-btn {
+  background: var(--green);
+  border: 1px solid #2a5a2a;
+  color: #b0ffb0;
+  padding: 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 12px;
+  transition: all 0.15s;
+  margin-top: auto;
+}
+.buy-btn:hover { background: #4a9a4a; }
+.buy-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── RIGHT PANEL SECTIONS ───────────────────────────── */
+.rp-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.rp-title {
+  font-family: var(--font-title);
+  font-size: 11px;
+  color: var(--gold-dark);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.equip-slot {
+  background: #0a0800;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+.equip-slot:hover { border-color: var(--gold); }
+.equip-slot .eq-label {
+  font-size: 8px;
+  color: var(--text-dim);
+  position: absolute;
+  bottom: 2px;
+}
+.stats-table { width: 100%; font-size: 12px; }
+.stats-table tr td:first-child { color: var(--text-dim); }
+.stats-table tr td:last-child { color: var(--gold-light); text-align: right; font-family: var(--font-title); }
+.combat-style-btns {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.cs-btn {
+  background: var(--brown-panel);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font-body);
+  transition: all 0.15s;
+}
+.cs-btn.active { border-color: var(--gold); color: var(--gold-light); background: var(--brown-ui); }
+
+/* ─── NOTIFICATIONS ──────────────────────────────────── */
+.notif-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+.notif {
+  background: var(--brown-ui);
+  border: 1px solid var(--gold-dark);
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+  animation: slideInRight 0.3s ease, fadeOut 0.5s ease 2s forwards;
+  pointer-events: none;
+}
+.notif.xp { border-color: var(--xp-bar); color: var(--green-bright); }
+.notif.loot { border-color: var(--gold); color: var(--gold-light); }
+.notif.level { border-color: var(--gold-light); background: #2a1e00; color: var(--gold-light); font-weight: bold; }
+@keyframes slideInRight {
+  from { transform: translateX(40px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeOut {
+  from { opacity: 1; } to { opacity: 0; }
+}
+
+/* ─── LOADING / MISC ─────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 10px 0;
+}
+.badge {
+  display: inline-block;
+  background: var(--brown-panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.req-ok { color: var(--green-bright); }
+.req-fail { color: var(--red-bright); }
+.text-gold { color: var(--gold); }
+.text-dim { color: var(--text-dim); }
+.mt-8 { margin-top: 8px; }
+.flex-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* ─── TOOLTIP ─────────────────────────────────────────── */
+[data-tip] { position: relative; }
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0a0800;
+  border: 1px solid var(--gold-dark);
+  border-radius: 3px;
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 200;
+}
+
+/* ─── SCROLLBAR ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--brown-dark); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold-dark); }
+
+/* ─── WOODCUTTING ANIM ────────────────────────────────── */
+@keyframes chop {
+  0%,100% { transform: rotate(0deg); }
+  50% { transform: rotate(-15deg); }
+}
+.chopping .a-icon { animation: chop 0.5s ease infinite; display: inline-block; }
+@keyframes swing {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+.fishing .a-icon { animation: swing 0.8s ease infinite; display: inline-block; }
+@keyframes sparkle {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.5; transform: scale(1.1); }
+}
+.smelting .a-icon { animation: sparkle 0.6s ease infinite; display: inline-block; }
+
+/* ─── RESPONSIVE ──────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .game-container { grid-template-columns: 180px 1fr; }
+  .right-panel { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚔️ RuneScape Idle</h1>
+  <div class="header-stats">
+    <div class="header-stat">Total Level<span id="total-level">3</span></div>
+    <div class="header-stat">Gold<span id="gold-display">0 gp</span></div>
+    <div class="header-stat">Time Played<span id="time-played">0:00</span></div>
+  </div>
+</header>
+
+<div class="game-container">
+
+  <!-- ─── LEFT NAV ─── -->
+  <nav class="sidebar">
+    <div class="nav-section-title">Skills</div>
+    <button class="nav-btn active" onclick="showPanel('skills')"><span class="icon">📊</span>Skills Overview<span class="skill-lvl" id="nav-total">3</span></button>
+    <button class="nav-btn" onclick="showPanel('woodcutting')"><span class="icon">🪓</span>Woodcutting<span class="skill-lvl" id="nav-wc">1</span></button>
+    <button class="nav-btn" onclick="showPanel('fishing')"><span class="icon">🎣</span>Fishing<span class="skill-lvl" id="nav-fish">1</span></button>
+    <button class="nav-btn" onclick="showPanel('mining')"><span class="icon">⛏️</span>Mining<span class="skill-lvl" id="nav-mine">1</span></button>
+    <button class="nav-btn" onclick="showPanel('smithing')"><span class="icon">🔨</span>Smithing<span class="skill-lvl" id="nav-smith">1</span></button>
+    <button class="nav-btn" onclick="showPanel('cooking')"><span class="icon">🍖</span>Cooking<span class="skill-lvl" id="nav-cook">1</span></button>
+    <button class="nav-btn" onclick="showPanel('firemaking')"><span class="icon">🔥</span>Firemaking<span class="skill-lvl" id="nav-fm">1</span></button>
+    <button class="nav-btn" onclick="showPanel('combat')"><span class="icon">⚔️</span>Combat<span class="skill-lvl" id="nav-cb">3</span></button>
+    <div class="nav-section-title">Manage</div>
+    <button class="nav-btn" onclick="showPanel('bank')"><span class="icon">🎒</span>Bank</button>
+    <button class="nav-btn" onclick="showPanel('shop')"><span class="icon">🏪</span>Shop</button>
+  </nav>
+
+  <!-- ─── MAIN ─── -->
+  <main class="main-panel">
+
+    <!-- SKILLS OVERVIEW -->
+    <div id="panel-skills" class="panel active">
+      <div class="ui-card">
+        <div class="ui-card-header">📊 Skills Overview — Gielinor's Finest</div>
+        <div class="ui-card-body">
+          <div class="skills-grid" id="skills-overview-grid"></div>
+        </div>
+      </div>
+      <div class="ui-card">
+        <div class="ui-card-header">📜 Welcome, Adventurer</div>
+        <div class="ui-card-body" style="font-size:13px;line-height:1.8;color:var(--text-dim)">
+          <p>Welcome to <span class="text-gold">RuneScape Idle</span> — an idle adventure set in the world of Gielinor.</p>
+          <p class="mt-8">Train your skills, slay monsters, and amass wealth. Click any skill in the sidebar to begin idling. Your character never sleeps — even when you do.</p>
+          <p class="mt-8" style="color:var(--gold)">💡 Tip: Start with Woodcutting or Mining to gather resources, then use them in Smithing and Cooking!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- WOODCUTTING -->
+    <div id="panel-woodcutting" class="panel">
+      <div class="ui-card">
+        <div class="ui-card-header">🪓 Woodcutting — Level <span id="wc-level-title">1</span></div>
+        <div class="ui-card-body">
+          <div class="xp-bar-wrapper">
+            <div class="xp-label"><span>XP: <span id="wc-xp">0</span></span><span>Next: <span id="wc-next">83</span></span></div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" id="wc-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="active-action-card" id="wc-active">
+        <h3>🪓 Currently Chopping: <span id="wc-current-name">—</span></h3>
+        <div class="big-progress-bg"><div class="big-progress-fill" id="wc-progress"><span class="progress-pct" id="wc-pct">0%</span></div></div>
+        <div style="font-size:11px;color:var(--text-dim)" id="wc-action-info"></div>
+        <button class="stop-btn" onclick="stopAction('wc')">⛔ Stop</button>
+      </div>
+      <div class="ui-card">
+        <div class="ui-card-header">🌲 Choose a Tree</div>
+        <div class="ui-card-body">
+          <div class="action-grid" id="wc-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FISHING -->
+    <div id="panel-fishing" class="panel">
+      <div class="ui-card">
+        <div class="ui-card-header">🎣 Fishing — Level <span id="fish-level-title">1</span></div>
+        <div class="ui-card-body">
+          <div class="xp-bar-wrapper">
+            <div class="xp-label"><span>XP: <span id="fish-xp">0</span></span><span>Next: <span id="fish-next">83</span></span></div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" id="fish-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="active-action-card" id="fish-active">
+        <h3>🎣 Currently Fishing: <span id="fish-current-name">—</span></h3>
+        <div class="big-progress-bg"><div class="big-progress-fill" id="fish-progress"><span class="progress-pct" id="fish-pct">0%</span></div></div>
+        <button class="stop-btn" onclick="stopAction('fish')">⛔ Stop</button>
+      </div>
+      <div class="ui-card">
+        <div class="ui-card-header">🐟 Choose a Fishing Spot</div>
+        <div class="ui-card-body">
+          <div class="action-grid" id="fish-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINING -->
+    <div id="panel-mining" class="panel">
+      <div class="ui-card">
+        <div class="ui-card-header">⛏️ Mining — Level <span id="mine-level-title">1</span></div>
+        <div class="ui-card-body">
+          <div class="xp-bar-wrapper">
+            <div class="xp-label"><span>XP: <span id="mine-xp">0</span></span><span>Next: <span id="mine-next">83</span></span></div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" id="mine-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="active-action-card" id="mine-active">
+        <h3>⛏️ Currently Mining: <span id="mine-current-name">—</span></h3>
+        <div class="big-progress-bg"><div class="big-progress-fill" id="mine-progress"><span class="progress-pct" id="mine-pct">0%</span></div></div>
+        <button class="stop-btn" onclick="stopAction('mine')">⛔ Stop</button>
+      </div>
+      <div class="ui-card">
+        <div class="ui-card-header">🪨 Choose a Rock</div>
+        <div class="ui-card-body">
+          <div class="action-grid" id="mine-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SMITHING -->
+    <div id="panel-smithing" class="panel">
+      <div class="ui-card">
+        <div class="ui-card-header">🔨 Smithing — Level <span id="smith-level-title">1</span></div>
+        <div class="ui-card-body">
+          <div class="xp-bar-wrapper">
+            <div class="xp-label"><span>XP: <span id="smith-xp">0</span></span><span>Next: <span id="smith-next">83</span></span></div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" id="smith-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="active-action-card" id="smith-active">
+        <h3>🔨 Currently Smithing: <span id="smith-current-name">—</span></h3>
+        <div class="big-progress-bg"><div class="big-progress-fill" id="smith-progress"><span class="progress-pct" id="smith-pct">0%</span></div></div>
+        <button class="stop-btn" onclick="stopAction('smith')">⛔ Stop</button>
+      </div>
+      <div class="ui-card">
+        <div class="ui-card-header">⚒️ Smith an Item (requires ores in bank)</div>
+        <div class="ui-card-body">
+          <div class="action-grid" id="smith-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COOKING -->
+    <div id="panel-cooking" class="panel">
+      <div class="ui-card">
+        <div class="ui-card-header">🍖 Cooking — Level <span id="cook-level-title">1</span></div>
+        <div class="ui-card-body">
+          <div class="xp-bar-wrapper">
+            <div class="xp-label"><span>XP: <span id="cook-xp">0</span></span><span>Next: <span id="cook-next">83</span></span></div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" id="cook-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="active-action-card" id="cook-active">
+        <h3>🍖 Currently Cooking: <span id="cook-current-name">—</span></h3>
+        <div class="big-progress-bg"><div class="big-progress-fill" id="cook-progress"><span class="progress-pct" id="cook-pct">0%</span></div></div>
+        <button class="stop-btn" onclick="stopAction('cook')">⛔ Stop</button>
+      </div>
+      <div class="ui-card">
+        <div class="ui-card-header">🔥 Cook a Food (requires raw fish/food in bank)</div>
+        <div class="ui-card-body">
+          <div class="action-grid" id="cook-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIREMAKING -->
+    <div id="panel-firemaking" class="panel">
+      <div class="ui-card">
+        <div class="ui-card-header">🔥 Firemaking — Level <span id="fm-level-title">1</span></div>
+        <div class="ui-card-body">
+          <div class="xp-bar-wrapper">
+            <div class="xp-label"><span>XP: <span id="fm-xp">0</span></span><span>Next: <span id="fm-next">83</span></span></div>
+            <div class="xp-bar-bg"><div class="xp-bar-fill" id="fm-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="active-action-card" id="fm-active">
+        <h3>🔥 Burning: <span id="fm-current-name">—</span></h3>
+        <div class="big-progress-bg"><div class="big-progress-fill" id="fm-progress"><span class="progress-pct" id="fm-pct">0%</span></div></div>
+        <button class="stop-btn" onclick="stopAction('fm')">⛔ Stop</button>
+      </div>
+      <div class="ui-card">
+        <div class="ui-card-header">🪵 Burn Logs (requires logs in bank)</div>
+        <div class="ui-card-body">
+          <div class="action-grid" id="fm-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMBAT -->
+    <div id="panel-combat" class="panel">
+      <div class="ui-card">
+        <div class="ui-card-header">⚔️ Combat</div>
+        <div class="ui-card-body">
+          <div class="combat-arena" id="combat-arena">
+            <div class="combatant player">
+              <div class="combatant-icon">🧙</div>
+              <div class="combatant-name" id="player-name">Adventurer</div>
+              <div class="hp-bar-bg"><div class="hp-bar-fill player" id="player-hp-bar" style="width:100%"></div></div>
+              <div class="hp-text">HP: <span id="player-hp">10</span> / <span id="player-max-hp">10</span></div>
+            </div>
+            <div class="vs-text">VS</div>
+            <div class="combatant monster">
+              <div class="combatant-icon" id="monster-icon">❓</div>
+              <div class="combatant-name" id="monster-name">— No Target —</div>
+              <div class="hp-bar-bg"><div class="hp-bar-fill" id="monster-hp-bar" style="width:0%"></div></div>
+              <div class="hp-text">HP: <span id="monster-hp">0</span> / <span id="monster-max-hp">0</span></div>
+            </div>
+          </div>
+          <div class="combat-log" id="combat-log"><p class="log-event">Select a monster below to begin combat...</p></div>
+          <div class="flex-row mt-8">
+            <button class="stop-btn" onclick="stopCombat()" style="background:var(--red)">⛔ Flee</button>
+            <span id="combat-status" class="text-dim" style="font-size:12px"></span>
+          </div>
+        </div>
+      </div>
+      <div class="ui-card">
+        <div class="ui-card-header">👹 Select Monster</div>
+        <div class="ui-card-body">
+          <div class="monster-select" id="monster-grid"></div>
+        </div>
+      </div>
+      <div class="ui-card">
+        <div class="ui-card-header">📊 Combat Skills</div>
+        <div class="ui-card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="combat-skill-display"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANK -->
+    <div id="panel-bank" class="panel">
+      <div class="ui-card">
+        <div class="ui-card-header">🎒 Bank — Your Items</div>
+        <div class="ui-card-body">
+          <div class="inventory-grid" id="bank-grid"></div>
+          <p class="text-dim mt-8" style="font-size:12px;font-style:italic">Items are automatically stored here as you gather them.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOP -->
+    <div id="panel-shop" class="panel">
+      <div class="ui-card">
+        <div class="ui-card-header">🏪 General Store</div>
+        <div class="ui-card-body">
+          <p class="text-dim" style="font-size:12px;margin-bottom:12px">Gold: <span class="text-gold" id="shop-gold">0 gp</span></p>
+          <div class="shop-grid" id="shop-grid"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ─── RIGHT PANEL ─── -->
+  <aside class="right-panel">
+    <div class="rp-section">
+      <div class="rp-title">⚔️ Equipment</div>
+      <div class="equipment-grid">
+        <div></div>
+        <div class="equip-slot" id="eq-head" data-tip="Head slot">🪖<span class="eq-label">Head</span></div>
+        <div></div>
+        <div class="equip-slot" id="eq-cape" data-tip="Cape slot">🧣<span class="eq-label">Cape</span></div>
+        <div class="equip-slot" id="eq-body" data-tip="Body slot">🦺<span class="eq-label">Body</span></div>
+        <div class="equip-slot" id="eq-shield" data-tip="Shield slot">🛡️<span class="eq-label">Shield</span></div>
+        <div class="equip-slot" id="eq-weapon" data-tip="Weapon slot">⚔️<span class="eq-label">Weapon</span></div>
+        <div class="equip-slot" id="eq-legs" data-tip="Legs slot">👖<span class="eq-label">Legs</span></div>
+        <div class="equip-slot" id="eq-boots" data-tip="Boots slot">👢<span class="eq-label">Boots</span></div>
+      </div>
+    </div>
+    <div class="rp-section">
+      <div class="rp-title">📊 Player Stats</div>
+      <table class="stats-table">
+        <tr><td>Attack</td><td id="stat-atk">1</td></tr>
+        <tr><td>Strength</td><td id="stat-str">1</td></tr>
+        <tr><td>Defence</td><td id="stat-def">1</td></tr>
+        <tr><td>Hitpoints</td><td id="stat-hp">10</td></tr>
+        <tr><td>Max Hit</td><td id="stat-maxhit">1</td></tr>
+        <tr><td>Accuracy</td><td id="stat-acc">75%</td></tr>
+      </table>
+    </div>
+    <div class="rp-section">
+      <div class="rp-title">⚔️ Combat Style</div>
+      <div class="combat-style-btns">
+        <button class="cs-btn active" onclick="setCombatStyle('accurate')">Accurate</button>
+        <button class="cs-btn" onclick="setCombatStyle('aggressive')">Aggressive</button>
+        <button class="cs-btn" onclick="setCombatStyle('defensive')">Defensive</button>
+      </div>
+    </div>
+    <div class="rp-section">
+      <div class="rp-title">🍖 Auto-Eat</div>
+      <div id="auto-eat-info" style="font-size:12px;color:var(--text-dim)">No food in bank</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Eats when HP &lt; 50%</div>
+    </div>
+    <div class="rp-section">
+      <div class="rp-title">📜 Recent Events</div>
+      <div id="event-log" style="font-size:11px;line-height:1.8;color:var(--text-dim);max-height:200px;overflow-y:auto"></div>
+    </div>
+  </aside>
+</div>
+
+<div class="notif-container" id="notif-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  GAME DATA
+// ═══════════════════════════════════════════════════════════
+
+const XP_TABLE = [0,83,174,276,388,512,650,801,969,1154,1358,1584,1833,2107,2411,2746,3115,3523,3973,4470,5018,5624,6291,7028,7842,8740,9730,10824,12031,13363,14833,16456,18247,20224,22406,24815,27473,30408,33648,37224,41171,45529,50339,55649,61512,67983,75127,83014,91721,101333,111945,123660,136594,150872,166636,184040,203254,224466,247886,273742,302288,333804,368599,407015,449428,496254,547953,605032,668051,737627,814445,899257,992895,1096278,1210421,1336443,1475581,1629200,1798808,1986068,2192818,2421087,2673114,2951373,3258594,3597792,3972294,4385776,4842295,5346332,5902831,6517253,7195629,7944614,8771558,9684577,13034431];
+
+function xpForLevel(lvl) { return XP_TABLE[Math.min(lvl-1, 98)]; }
+function levelFromXp(xp) {
+  for (let i = 98; i >= 0; i--) if (xp >= XP_TABLE[i]) return i+1;
+  return 1;
+}
+function xpToNext(xp) {
+  const lvl = levelFromXp(xp);
+  if (lvl >= 99) return 0;
+  return XP_TABLE[lvl] - xp;
+}
+function xpPct(xp) {
+  const lvl = levelFromXp(xp);
+  if (lvl >= 99) return 100;
+  const base = XP_TABLE[lvl-1], next = XP_TABLE[lvl];
+  return ((xp - base) / (next - base) * 100).toFixed(1);
+}
+
+// ── SKILL DEFINITIONS ──
+const SKILLS_DEF = [
+  { id:'wc',    name:'Woodcutting', icon:'🪓' },
+  { id:'fish',  name:'Fishing',     icon:'🎣' },
+  { id:'mine',  name:'Mining',      icon:'⛏️' },
+  { id:'smith', name:'Smithing',    icon:'🔨' },
+  { id:'cook',  name:'Cooking',     icon:'🍖' },
+  { id:'fm',    name:'Firemaking',  icon:'🔥' },
+  { id:'atk',   name:'Attack',      icon:'⚔️' },
+  { id:'str',   name:'Strength',    icon:'💪' },
+  { id:'def',   name:'Defence',     icon:'🛡️' },
+  { id:'hp',    name:'Hitpoints',   icon:'❤️' },
+];
+
+// ── TREES ──
+const TREES = [
+  { id:'normal',  name:'Normal Tree',  icon:'🌲', level:1,  xp:25,  time:3000,  item:'logs',          itemName:'Logs',         gpEach:4  },
+  { id:'oak',     name:'Oak Tree',     icon:'🌳', level:15, xp:37.5,time:4000,  item:'oak_logs',      itemName:'Oak Logs',     gpEach:8  },
+  { id:'willow',  name:'Willow Tree',  icon:'🌿', level:30, xp:67.5,time:5000,  item:'willow_logs',   itemName:'Willow Logs',  gpEach:12 },
+  { id:'maple',   name:'Maple Tree',   icon:'🍁', level:45, xp:100, time:6000,  item:'maple_logs',    itemName:'Maple Logs',   gpEach:20 },
+  { id:'yew',     name:'Yew Tree',     icon:'🌲', level:60, xp:175, time:8000,  item:'yew_logs',      itemName:'Yew Logs',     gpEach:60 },
+  { id:'magic',   name:'Magic Tree',   icon:'✨', level:75, xp:250, time:11000, item:'magic_logs',    itemName:'Magic Logs',   gpEach:200},
+];
+
+// ── FISHING SPOTS ──
+const FISH_SPOTS = [
+  { id:'shrimp',   name:'Shrimps',       icon:'🦐', level:1,  xp:10,  time:2500,  item:'raw_shrimp',    itemName:'Raw Shrimps',    gpEach:3  },
+  { id:'sardine',  name:'Sardine',        icon:'🐟', level:5,  xp:20,  time:3000,  item:'raw_sardine',   itemName:'Raw Sardine',    gpEach:6  },
+  { id:'trout',    name:'Trout',          icon:'🐠', level:20, xp:50,  time:4000,  item:'raw_trout',     itemName:'Raw Trout',      gpEach:14 },
+  { id:'salmon',   name:'Salmon',         icon:'🐟', level:30, xp:70,  time:5000,  item:'raw_salmon',    itemName:'Raw Salmon',     gpEach:30 },
+  { id:'lobster',  name:'Lobster',        icon:'🦞', level:40, xp:90,  time:6000,  item:'raw_lobster',   itemName:'Raw Lobster',    gpEach:50 },
+  { id:'swordfish',name:'Swordfish',      icon:'🐡', level:50, xp:100, time:7000,  item:'raw_swordfish', itemName:'Raw Swordfish',  gpEach:90 },
+  { id:'shark',    name:'Shark',          icon:'🦈', level:76, xp:110, time:9000,  item:'raw_shark',     itemName:'Raw Shark',      gpEach:180},
+];
+
+// ── ORES / MINING ──
+const ORES = [
+  { id:'copper', name:'Copper Rock',  icon:'🪨', level:1,  xp:17.5,time:2500,  item:'copper_ore',    itemName:'Copper Ore',   gpEach:5  },
+  { id:'tin',    name:'Tin Rock',     icon:'🪨', level:1,  xp:17.5,time:2500,  item:'tin_ore',       itemName:'Tin Ore',      gpEach:5  },
+  { id:'iron',   name:'Iron Rock',    icon:'🔩', level:15, xp:35,  time:3500,  item:'iron_ore',      itemName:'Iron Ore',     gpEach:15 },
+  { id:'coal',   name:'Coal Rock',    icon:'⚫', level:30, xp:50,  time:4000,  item:'coal',          itemName:'Coal',         gpEach:25 },
+  { id:'gold',   name:'Gold Rock',    icon:'🟡', level:40, xp:65,  time:5000,  item:'gold_ore',      itemName:'Gold Ore',     gpEach:35 },
+  { id:'mithril',name:'Mithril Rock', icon:'🔵', level:55, xp:80,  time:6000,  item:'mithril_ore',   itemName:'Mithril Ore',  gpEach:60 },
+  { id:'adamant',name:'Adamant Rock', icon:'🟢', level:70, xp:95,  time:8000,  item:'adamant_ore',   itemName:'Adamantite Ore',gpEach:100},
+  { id:'rune',   name:'Runite Rock',  icon:'🔷', level:85, xp:125, time:11000, item:'rune_ore',      itemName:'Runite Ore',   gpEach:300},
+];
+
+// ── SMITHING ──
+const SMITH_ITEMS = [
+  { id:'bronze_bar', name:'Bronze Bar', icon:'🟫', level:1,  xp:6.2, time:2500, inputs:{ copper_ore:1, tin_ore:1 },   item:'bronze_bar', itemName:'Bronze Bar',  gpEach:18  },
+  { id:'iron_bar',   name:'Iron Bar',   icon:'⬜', level:15, xp:12.5,time:3000, inputs:{ iron_ore:1 },                 item:'iron_bar',   itemName:'Iron Bar',    gpEach:40  },
+  { id:'steel_bar',  name:'Steel Bar',  icon:'⬛', level:30, xp:17.5,time:3500, inputs:{ iron_ore:1, coal:2 },         item:'steel_bar',  itemName:'Steel Bar',   gpEach:120 },
+  { id:'gold_bar',   name:'Gold Bar',   icon:'🟡', level:40, xp:22.5,time:3500, inputs:{ gold_ore:1 },                 item:'gold_bar',   itemName:'Gold Bar',    gpEach:95  },
+  { id:'mith_bar',   name:'Mithril Bar',icon:'🔵', level:50, xp:30,  time:4000, inputs:{ mithril_ore:1, coal:4 },     item:'mith_bar',   itemName:'Mithril Bar', gpEach:200 },
+  { id:'addy_bar',   name:'Addy Bar',   icon:'🟢', level:70, xp:37.5,time:5000, inputs:{ adamant_ore:1, coal:6 },     item:'addy_bar',   itemName:'Adamant Bar', gpEach:450 },
+  { id:'rune_bar',   name:'Rune Bar',   icon:'🔷', level:85, xp:50,  time:6000, inputs:{ rune_ore:1, coal:8 },        item:'rune_bar',   itemName:'Rune Bar',    gpEach:1200},
+];
+
+// ── COOKING ──
+const FOOD_RECIPES = [
+  { id:'cooked_shrimp',   name:'Shrimps',    icon:'🦐', level:1,  xp:30,  time:2000, inputs:{raw_shrimp:1},    item:'cooked_shrimp',   itemName:'Shrimps',    heal:3,  gpEach:10  },
+  { id:'cooked_sardine',  name:'Sardine',    icon:'🐟', level:1,  xp:40,  time:2000, inputs:{raw_sardine:1},   item:'cooked_sardine',  itemName:'Sardine',    heal:4,  gpEach:14  },
+  { id:'cooked_trout',    name:'Trout',      icon:'🐠', level:15, xp:70,  time:2500, inputs:{raw_trout:1},     item:'cooked_trout',    itemName:'Trout',      heal:7,  gpEach:30  },
+  { id:'cooked_salmon',   name:'Salmon',     icon:'🐟', level:25, xp:90,  time:3000, inputs:{raw_salmon:1},    item:'cooked_salmon',   itemName:'Salmon',     heal:9,  gpEach:50  },
+  { id:'cooked_lobster',  name:'Lobster',    icon:'🦞', level:40, xp:120, time:3500, inputs:{raw_lobster:1},   item:'cooked_lobster',  itemName:'Lobster',    heal:12, gpEach:110 },
+  { id:'cooked_swordfish',name:'Swordfish',  icon:'🐡', level:45, xp:140, time:4000, inputs:{raw_swordfish:1}, item:'cooked_swordfish',itemName:'Swordfish',  heal:14, gpEach:180 },
+  { id:'cooked_shark',    name:'Shark',      icon:'🦈', level:80, xp:210, time:5000, inputs:{raw_shark:1},     item:'cooked_shark',    itemName:'Shark',      heal:20, gpEach:380 },
+];
+
+// ── FIREMAKING ──
+const LOG_TYPES = [
+  { id:'fm_normal',  name:'Logs',        icon:'🪵', level:1,  xp:40,  time:2000, inputs:{logs:1},         item:null },
+  { id:'fm_oak',     name:'Oak Logs',    icon:'🪵', level:15, xp:60,  time:2500, inputs:{oak_logs:1},     item:null },
+  { id:'fm_willow',  name:'Willow Logs', icon:'🪵', level:30, xp:90,  time:3000, inputs:{willow_logs:1},  item:null },
+  { id:'fm_maple',   name:'Maple Logs',  icon:'🪵', level:45, xp:135, time:3500, inputs:{maple_logs:1},   item:null },
+  { id:'fm_yew',     name:'Yew Logs',    icon:'🪵', level:60, xp:202, time:4000, inputs:{yew_logs:1},     item:null },
+  { id:'fm_magic',   name:'Magic Logs',  icon:'🪵', level:75, xp:303, time:5000, inputs:{magic_logs:1},   item:null },
+];
+
+// ── MONSTERS ──
+const MONSTERS = [
+  { id:'chicken',     name:'Chicken',      icon:'🐔', level:1,   hp:3,   maxHit:1,  accuracy:20, xpMult:3,  loot:[{item:'raw_chicken',name:'Raw Chicken',icon:'🍗',chance:1,qty:1}],  gp:[1,5]  },
+  { id:'goblin',      name:'Goblin',       icon:'👺', level:5,   hp:5,   maxHit:2,  accuracy:30, xpMult:4,  loot:[{item:'bronze_sword',name:'Bronze Sword',icon:'⚔️',chance:0.1,qty:1}], gp:[3,12] },
+  { id:'cow',         name:'Cow',          icon:'🐄', level:8,   hp:8,   maxHit:2,  accuracy:30, xpMult:6,  loot:[{item:'cowhide',name:'Cowhide',icon:'🟤',chance:1,qty:1}],              gp:[2,8]  },
+  { id:'guard',       name:'Guard',        icon:'💂', level:19,  hp:18,  maxHit:5,  accuracy:50, xpMult:14, loot:[{item:'iron_ore',name:'Iron Ore',icon:'🔩',chance:0.3,qty:1}],           gp:[10,30]},
+  { id:'highwayman',  name:'Highwayman',   icon:'🥷', level:25,  hp:25,  maxHit:6,  accuracy:55, xpMult:20, loot:[],                                                                       gp:[20,60]},
+  { id:'scorpion',    name:'Scorpion',     icon:'🦂', level:37,  hp:35,  maxHit:8,  accuracy:60, xpMult:30, loot:[{item:'coins',name:'Coins',icon:'🪙',chance:0.5,qty:3}],                 gp:[15,50]},
+  { id:'knight',      name:'Black Knight', icon:'🗡️', level:54,  hp:55,  maxHit:14, accuracy:65, xpMult:50, loot:[{item:'steel_bar',name:'Steel Bar',icon:'⬛',chance:0.2,qty:1}],         gp:[50,150]},
+  { id:'lesser_demon',name:'Lesser Demon', icon:'😈', level:82,  hp:79,  maxHit:20, accuracy:70, xpMult:80, loot:[{item:'rune_med_helm',name:'Rune Med Helm',icon:'🪖',chance:0.05,qty:1}],gp:[100,400]},
+  { id:'greater_demon',name:'Greater Demon',icon:'👿',level:100, hp:100, maxHit:27, accuracy:75, xpMult:100,loot:[{item:'rune_chain',name:'Rune Chainbody',icon:'🦺',chance:0.03,qty:1}],  gp:[200,600]},
+  { id:'dragon',      name:'Green Dragon', icon:'🐉', level:79,  hp:75,  maxHit:24, accuracy:73, xpMult:95, loot:[{item:'dragon_bones',name:'Dragon Bones',icon:'🦴',chance:1,qty:1}],     gp:[200,500]},
+];
+
+// ── SHOP ──
+const SHOP_ITEMS = [
+  { id:'bronze_sword',  name:'Bronze Sword',   icon:'⚔️', desc:'Starter weapon. Melee attack +5.',     cost:50,  effect:{ slot:'weapon', atkBonus:5,  strBonus:5  } },
+  { id:'iron_sword',    name:'Iron Sword',      icon:'⚔️', desc:'Iron weapon. Melee attack +9.',        cost:300, effect:{ slot:'weapon', atkBonus:9,  strBonus:9  } },
+  { id:'steel_scimitar',name:'Steel Scimitar',  icon:'⚔️', desc:'Fast and reliable. Attack +15.',       cost:900, effect:{ slot:'weapon', atkBonus:15, strBonus:14 } },
+  { id:'mith_scimitar', name:'Mithril Scimitar',icon:'⚔️', desc:'Mithril blade. Attack +21.',           cost:2800,effect:{ slot:'weapon', atkBonus:21, strBonus:20 } },
+  { id:'addy_scimitar', name:'Addy Scimitar',   icon:'⚔️', desc:'Adamantite edge. Attack +29.',         cost:8000,effect:{ slot:'weapon', atkBonus:29, strBonus:28 } },
+  { id:'bronze_shield', name:'Bronze Shield',   icon:'🛡️', desc:'Basic shield. Defence +5.',            cost:80,  effect:{ slot:'shield', defBonus:5  } },
+  { id:'iron_shield',   name:'Iron Shield',     icon:'🛡️', desc:'Iron shield. Defence +11.',            cost:400, effect:{ slot:'shield', defBonus:11 } },
+  { id:'steel_shield',  name:'Steel Shield',    icon:'🛡️', desc:'Steel shield. Defence +19.',           cost:1200,effect:{ slot:'shield', defBonus:19 } },
+  { id:'leather_body',  name:'Leather Body',    icon:'🦺', desc:'Leather armour. Defence +8.',          cost:200, effect:{ slot:'body',   defBonus:8  } },
+  { id:'iron_chainmail',name:'Iron Chainbody',  icon:'🦺', desc:'Iron chain. Defence +15.',             cost:600, effect:{ slot:'body',   defBonus:15 } },
+  { id:'steel_platebody',name:'Steel Platebody',icon:'🦺', desc:'Heavy steel. Defence +28.',            cost:2400,effect:{ slot:'body',   defBonus:28 } },
+];
+
+// ── FOOD (for auto-eat) ──
+const FOOD_HEAL = {};
+FOOD_RECIPES.forEach(f => { FOOD_HEAL[f.item] = f.heal; });
+FOOD_HEAL['raw_chicken'] = 3;
+
+// ═══════════════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════════════
+let G = {
+  skills: { wc:0, fish:0, mine:0, smith:0, cook:0, fm:0, atk:0, str:0, def:0, hp:1154 },
+  bank: {},
+  gold: 0,
+  equipment: { head:null, cape:null, body:null, shield:null, weapon:null, legs:null, boots:null },
+  equippedBonuses: { atkBonus:0, strBonus:0, defBonus:0 },
+  combatStyle: 'accurate',
+  timePlayed: 0,
+};
+
+// Active actions
+let activeActions = {};
+
+// Combat state
+let combat = {
+  active: false,
+  monster: null,
+  playerHp: 0,
+  maxHp: 0,
+  monsterHp: 0,
+  timer: null,
+  attackTimer: 0,
+};
+
+// ═══════════════════════════════════════════════════════════
+//  UTILITY
+// ═══════════════════════════════════════════════════════════
+function skillLevel(id) { return levelFromXp(G.skills[id] || 0); }
+function skillXp(id) { return G.skills[id] || 0; }
+function bankQty(item) { return G.bank[item] || 0; }
+
+function addToBank(item, qty, name, icon) {
+  if (!G.bank[item]) G.bank[item] = 0;
+  G.bank[item] += qty;
+  if (name) bankMeta[item] = { name, icon: icon||'📦' };
+}
+const bankMeta = {};
+
+function addXp(skill, xp) {
+  const oldLevel = skillLevel(skill);
+  G.skills[skill] = (G.skills[skill] || 0) + xp;
+  const newLevel = skillLevel(skill);
+  if (newLevel > oldLevel) {
+    onLevelUp(skill, newLevel);
+  }
+  updateSkillUI(skill);
+}
+
+function onLevelUp(skill, level) {
+  const def = SKILLS_DEF.find(s => s.id === skill);
+  const name = def ? def.name : skill;
+  notify(`🎉 Level Up! ${name} is now level ${level}!`, 'level');
+  addEvent(`🎉 ${name} reached level ${level}!`);
+  // Update max HP
+  if (skill === 'hp') {
+    combat.maxHp = 10 + skillLevel('hp') * 1;
+    if (!combat.active) combat.playerHp = combat.maxHp;
+    document.getElementById('player-max-hp').textContent = combat.maxHp;
+    document.getElementById('stat-hp').textContent = combat.maxHp;
+  }
+}
+
+function fmtNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return Math.floor(n).toLocaleString();
+}
+
+function notify(msg, type='') {
+  const c = document.getElementById('notif-container');
+  const el = document.createElement('div');
+  el.className = `notif ${type}`;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 2700);
+}
+
+function addEvent(msg) {
+  const log = document.getElementById('event-log');
+  const p = document.createElement('p');
+  p.textContent = msg;
+  log.prepend(p);
+  while (log.children.length > 30) log.removeChild(log.lastChild);
+}
+
+function addCombatLog(msg, cls='') {
+  const log = document.getElementById('combat-log');
+  const p = document.createElement('p');
+  p.className = cls;
+  p.innerHTML = msg;
+  log.appendChild(p);
+  log.scrollTop = log.scrollHeight;
+  while (log.children.length > 60) log.removeChild(log.firstChild);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NAV
+// ═══════════════════════════════════════════════════════════
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`panel-${id}`).classList.add('active');
+  const btns = document.querySelectorAll('.nav-btn');
+  btns.forEach(b => { if (b.getAttribute('onclick')?.includes(`'${id}'`)) b.classList.add('active'); });
+  if (id === 'bank') renderBank();
+  if (id === 'shop') renderShop();
+  if (id === 'smith') renderSmithGrid();
+  if (id === 'cook') renderCookGrid();
+  if (id === 'fm') renderFmGrid();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SKILLS UI
+// ═══════════════════════════════════════════════════════════
+function updateSkillUI(id) {
+  const lvl = skillLevel(id);
+  const xp = skillXp(id);
+  // Nav
+  const navEl = document.getElementById(`nav-${id}`);
+  if (navEl) navEl.textContent = lvl;
+  // Skill level titles
+  const t = document.getElementById(`${id}-level-title`);
+  if (t) t.textContent = lvl;
+  // XP display
+  const xpEl = document.getElementById(`${id}-xp`);
+  if (xpEl) xpEl.textContent = fmtNum(xp);
+  const nextEl = document.getElementById(`${id}-next`);
+  if (nextEl) nextEl.textContent = fmtNum(xpToNext(xp));
+  const barEl = document.getElementById(`${id}-bar`);
+  if (barEl) barEl.style.width = xpPct(xp) + '%';
+  // Overview grid
+  renderSkillsOverview();
+  // Total
+  const total = SKILLS_DEF.reduce((a,s) => a + skillLevel(s.id), 0);
+  document.getElementById('total-level').textContent = total;
+  document.getElementById('nav-total').textContent = total;
+  // Combat skills
+  if (['atk','str','def','hp'].includes(id)) updateCombatStats();
+  // Right panel stats
+  document.getElementById('stat-atk').textContent = skillLevel('atk');
+  document.getElementById('stat-str').textContent = skillLevel('str');
+  document.getElementById('stat-def').textContent = skillLevel('def');
+  const maxHp = 10 + skillLevel('hp');
+  document.getElementById('stat-hp').textContent = maxHp;
+  document.getElementById('stat-maxhit').textContent = getMaxHit();
+}
+
+function renderSkillsOverview() {
+  const grid = document.getElementById('skills-overview-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  SKILLS_DEF.forEach(s => {
+    const lvl = skillLevel(s.id);
+    const xp = skillXp(s.id);
+    const div = document.createElement('div');
+    div.className = 'skill-box';
+    div.innerHTML = `<div class="s-icon">${s.icon}</div>
+      <div class="s-name">${s.name}</div>
+      <div class="s-level">${lvl}</div>
+      <div class="s-xp">${fmtNum(xp)} xp</div>`;
+    div.onclick = () => {
+      const panelMap = { wc:'woodcutting', fish:'fishing', mine:'mining', smith:'smithing', cook:'cooking', fm:'firemaking', atk:'combat', str:'combat', def:'combat', hp:'combat' };
+      showPanel(panelMap[s.id] || s.id);
+    };
+    grid.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GENERIC SKILL ACTION SYSTEM
+// ═══════════════════════════════════════════════════════════
+function startAction(skill, actionDef) {
+  // Check level
+  const lvl = skillLevel(skill === 'wc' ? 'wc' : skill === 'fish' ? 'fish' : skill);
+  // Check inputs
+  if (actionDef.inputs) {
+    for (const [item, qty] of Object.entries(actionDef.inputs)) {
+      if (bankQty(item) < qty) {
+        notify(`Not enough ${bankMeta[item]?.name || item}!`, '');
+        return;
+      }
+    }
+  }
+  // Stop existing
+  if (activeActions[skill]) stopAction(skill);
+  // Consume inputs if smithing/cooking/fm
+  // Start
+  activeActions[skill] = {
+    def: actionDef,
+    progress: 0,
+    startTime: Date.now(),
+  };
+  updateActiveCard(skill);
+  updateActionGrid(skill);
+}
+
+function stopAction(skill) {
+  if (activeActions[skill]) {
+    delete activeActions[skill];
+    const card = document.getElementById(`${skill}-active`);
+    if (card) card.classList.remove('visible');
+    updateActionGrid(skill);
+  }
+}
+
+function updateActiveCard(skill) {
+  const card = document.getElementById(`${skill}-active`);
+  if (!card) return;
+  const a = activeActions[skill];
+  if (!a) { card.classList.remove('visible'); return; }
+  card.classList.add('visible');
+  const nameEl = document.getElementById(`${skill}-current-name`);
+  if (nameEl) nameEl.textContent = a.def.name;
+}
+
+function tickSkillAction(skill) {
+  const a = activeActions[skill];
+  if (!a) return;
+
+  // Check inputs again (smith/cook/fm consume each cycle)
+  if (a.def.inputs) {
+    for (const [item, qty] of Object.entries(a.def.inputs)) {
+      if (bankQty(item) < qty) {
+        notify(`Ran out of ${bankMeta[item]?.name || item}!`);
+        stopAction(skill);
+        return;
+      }
+    }
+  }
+
+  const elapsed = Date.now() - a.startTime;
+  const pct = Math.min(elapsed / a.def.time * 100, 100);
+
+  // Update progress
+  const bar = document.getElementById(`${skill}-progress`);
+  const pctEl = document.getElementById(`${skill}-pct`);
+  if (bar) bar.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = Math.floor(pct) + '%';
+
+  // Mini bar on action buttons
+  document.querySelectorAll(`#${skill}-grid .action-btn.doing .action-progress`).forEach(b => b.style.width = pct+'%');
+
+  if (pct >= 100) {
+    // Complete action
+    const xpSkillMap = { wc:'wc', fish:'fish', mine:'mine', smith:'smith', cook:'cook', fm:'fm' };
+    const xpSkill = xpSkillMap[skill] || skill;
+    addXp(xpSkill, a.def.xp);
+
+    // Give item
+    if (a.def.item) {
+      addToBank(a.def.item, 1, a.def.itemName, a.def.icon);
+      addEvent(`${a.def.icon} Received 1x ${a.def.itemName}`);
+    }
+    // Consume inputs
+    if (a.def.inputs) {
+      for (const [item, qty] of Object.entries(a.def.inputs)) {
+        G.bank[item] = (G.bank[item] || 0) - qty;
+        if (G.bank[item] <= 0) delete G.bank[item];
+      }
+    }
+
+    // Reset timer
+    a.startTime = Date.now();
+    a.progress = 0;
+
+    // If inputs gone, stop
+    if (a.def.inputs) {
+      for (const [item, qty] of Object.entries(a.def.inputs)) {
+        if (bankQty(item) < qty) {
+          stopAction(skill);
+          notify(`Ran out of materials!`);
+          return;
+        }
+      }
+    }
+    // Update dynamic grids
+    if (skill === 'smith') renderSmithGrid();
+    if (skill === 'cook') renderCookGrid();
+    if (skill === 'fm') renderFmGrid();
+    if (document.getElementById('panel-bank')?.classList.contains('active')) renderBank();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BUILD ACTION GRIDS
+// ═══════════════════════════════════════════════════════════
+function buildSkillGrid(skill, actions, levelKey, anim='') {
+  const grid = document.getElementById(`${skill}-grid`);
+  if (!grid) return;
+  grid.innerHTML = '';
+  actions.forEach(act => {
+    const lvl = skillLevel(levelKey);
+    const locked = lvl < act.level;
+    // Check inputs
+    let hasInputs = true;
+    if (act.inputs) {
+      for (const [item, qty] of Object.entries(act.inputs)) {
+        if (bankQty(item) < qty) { hasInputs = false; }
+      }
+    }
+    const isDoing = activeActions[skill]?.def?.id === act.id;
+    const btn = document.createElement('button');
+    btn.className = `action-btn${isDoing ? ' doing' : ''} ${anim}`;
+    btn.disabled = locked;
+
+    let inputsHtml = '';
+    if (act.inputs) {
+      inputsHtml = '<div class="a-req" style="margin-top:3px">';
+      for (const [item, qty] of Object.entries(act.inputs)) {
+        const have = bankQty(item);
+        const meta = bankMeta[item];
+        const name = meta?.name || item;
+        inputsHtml += `<span class="${have>=qty?'req-ok':'req-fail'}">${qty}x ${name} (${have})</span> `;
+      }
+      inputsHtml += '</div>';
+    }
+
+    btn.innerHTML = `
+      <div class="a-icon">${act.icon}</div>
+      <div class="a-name">${act.name}</div>
+      <div class="a-req">Req: <span class="${!locked?'req-ok':'req-fail'}">${act.level} ${levelKey.toUpperCase()}</span></div>
+      ${inputsHtml}
+      <div class="a-reward">+${act.xp} XP${act.item ? ` • 1x ${act.itemName}` : ''}</div>
+      <div class="a-req">${(act.time/1000).toFixed(1)}s per action</div>
+      <div class="action-progress"></div>`;
+    if (!locked) {
+      btn.onclick = () => {
+        if (isDoing) { stopAction(skill); return; }
+        startAction(skill, act);
+        buildSkillGrid(skill, actions, levelKey, anim);
+      };
+    }
+    grid.appendChild(btn);
+  });
+}
+
+function updateActionGrid(skill) {
+  if (skill === 'wc') buildSkillGrid('wc', TREES, 'wc', 'chopping');
+  if (skill === 'fish') buildSkillGrid('fish', FISH_SPOTS, 'fish', 'fishing');
+  if (skill === 'mine') buildSkillGrid('mine', ORES, 'mine', '');
+  if (skill === 'smith') renderSmithGrid();
+  if (skill === 'cook') renderCookGrid();
+  if (skill === 'fm') renderFmGrid();
+}
+
+function renderSmithGrid() { buildSkillGrid('smith', SMITH_ITEMS, 'smith', 'smelting'); }
+function renderCookGrid() { buildSkillGrid('cook', FOOD_RECIPES, 'cook', ''); }
+function renderFmGrid() { buildSkillGrid('fm', LOG_TYPES, 'fm', ''); }
+
+// ═══════════════════════════════════════════════════════════
+//  BANK
+// ═══════════════════════════════════════════════════════════
+function renderBank() {
+  const grid = document.getElementById('bank-grid');
+  grid.innerHTML = '';
+  const items = Object.entries(G.bank).filter(([k,v]) => v > 0);
+  if (items.length === 0) {
+    grid.innerHTML = '<p class="text-dim" style="font-size:12px;font-style:italic;padding:8px">Your bank is empty. Get out there and gather some resources!</p>';
+    return;
+  }
+  items.forEach(([item, qty]) => {
+    const meta = bankMeta[item] || { name: item, icon: '📦' };
+    const div = document.createElement('div');
+    div.className = 'inv-slot';
+    div.innerHTML = `<div class="i-icon">${meta.icon}</div><div class="i-qty">${fmtNum(qty)}</div><div class="i-name">${meta.name}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SHOP
+// ═══════════════════════════════════════════════════════════
+function renderShop() {
+  document.getElementById('shop-gold').textContent = fmtNum(G.gold) + ' gp';
+  const grid = document.getElementById('shop-grid');
+  grid.innerHTML = '';
+  SHOP_ITEMS.forEach(si => {
+    const div = document.createElement('div');
+    div.className = 'shop-item';
+    const canBuy = G.gold >= si.cost;
+    div.innerHTML = `
+      <div class="si-icon">${si.icon}</div>
+      <div class="si-name">${si.name}</div>
+      <div class="si-desc">${si.desc}</div>
+      <div class="si-cost">🪙 ${fmtNum(si.cost)} gp</div>
+      <button class="buy-btn" ${canBuy?'':'disabled'} onclick="buyItem('${si.id}')">Buy</button>`;
+    grid.appendChild(div);
+  });
+}
+
+function buyItem(id) {
+  const item = SHOP_ITEMS.find(i => i.id === id);
+  if (!item || G.gold < item.cost) { notify('Not enough gold!'); return; }
+  G.gold -= item.cost;
+  updateGoldDisplay();
+  // Equip item
+  equipItem(item);
+  notify(`🛒 Bought ${item.name}!`, 'loot');
+  renderShop();
+}
+
+function equipItem(item) {
+  const slot = item.effect.slot;
+  G.equipment[slot] = item;
+  // Recalc bonuses
+  G.equippedBonuses = { atkBonus: 0, strBonus: 0, defBonus: 0 };
+  Object.values(G.equipment).forEach(eq => {
+    if (eq?.effect) {
+      G.equippedBonuses.atkBonus += eq.effect.atkBonus || 0;
+      G.equippedBonuses.strBonus += eq.effect.strBonus || 0;
+      G.equippedBonuses.defBonus += eq.effect.defBonus || 0;
+    }
+  });
+  // Update slot UI
+  const slotEl = document.getElementById(`eq-${slot}`);
+  if (slotEl) slotEl.innerHTML = `${item.icon}<span class="eq-label">${slot}</span>`;
+  updateCombatStats();
+  addEvent(`🛡️ Equipped ${item.name}`);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COMBAT STATS
+// ═══════════════════════════════════════════════════════════
+function getMaxHit() {
+  const strLvl = skillLevel('str');
+  const strBonus = G.equippedBonuses.strBonus;
+  return Math.floor(0.5 + (strLvl + strBonus + 8) * (strBonus + 64) / 640);
+}
+
+function getAccuracy() {
+  const atkLvl = skillLevel('atk');
+  const atkBonus = G.equippedBonuses.atkBonus;
+  return Math.min(95, 25 + atkLvl * 0.5 + atkBonus * 0.3);
+}
+
+function getPlayerMaxHp() { return 10 + skillLevel('hp'); }
+
+function updateCombatStats() {
+  document.getElementById('stat-atk').textContent = skillLevel('atk');
+  document.getElementById('stat-str').textContent = skillLevel('str');
+  document.getElementById('stat-def').textContent = skillLevel('def');
+  document.getElementById('stat-maxhit').textContent = getMaxHit();
+  document.getElementById('stat-acc').textContent = Math.round(getAccuracy()) + '%';
+  renderCombatSkillDisplay();
+}
+
+function renderCombatSkillDisplay() {
+  const el = document.getElementById('combat-skill-display');
+  if (!el) return;
+  const skills = [
+    { id:'atk', name:'Attack', icon:'⚔️' },
+    { id:'str', name:'Strength', icon:'💪' },
+    { id:'def', name:'Defence', icon:'🛡️' },
+    { id:'hp',  name:'Hitpoints', icon:'❤️' },
+  ];
+  el.innerHTML = skills.map(s => {
+    const lvl = skillLevel(s.id);
+    const xp = skillXp(s.id);
+    return `<div style="background:var(--brown-panel);border:1px solid var(--border);border-radius:4px;padding:8px;text-align:center">
+      <div style="font-size:20px">${s.icon}</div>
+      <div style="font-size:10px;color:var(--text-dim);font-family:var(--font-title)">${s.name}</div>
+      <div style="font-size:18px;font-family:var(--font-title);color:var(--gold-light)">${lvl}</div>
+      <div style="font-size:9px;color:var(--text-dim)">${fmtNum(xp)} xp</div>
+    </div>`;
+  }).join('');
+}
+
+function setCombatStyle(style) {
+  G.combatStyle = style;
+  document.querySelectorAll('.cs-btn').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes(style));
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COMBAT
+// ═══════════════════════════════════════════════════════════
+function buildMonsterGrid() {
+  const grid = document.getElementById('monster-grid');
+  grid.innerHTML = '';
+  MONSTERS.forEach(m => {
+    const btn = document.createElement('div');
+    btn.className = `monster-btn${combat.monster?.id === m.id ? ' selected' : ''}`;
+    const reqLvl = Math.floor(m.level / 3);
+    const atkLvl = skillLevel('atk');
+    btn.innerHTML = `<span class="m-icon">${m.icon}</span><div class="m-name">${m.name}</div><div class="m-level">Lvl ${m.level} · ${m.hp} HP</div>`;
+    btn.onclick = () => selectMonster(m);
+    grid.appendChild(btn);
+  });
+}
+
+function selectMonster(m) {
+  if (combat.active) stopCombat();
+  combat.monster = m;
+  combat.monsterHp = m.hp;
+  combat.playerHp = Math.min(combat.playerHp || getPlayerMaxHp(), getPlayerMaxHp());
+  combat.maxHp = getPlayerMaxHp();
+  combat.active = true;
+
+  document.getElementById('monster-icon').textContent = m.icon;
+  document.getElementById('monster-name').textContent = m.name;
+  document.getElementById('monster-hp').textContent = m.hp;
+  document.getElementById('monster-max-hp').textContent = m.hp;
+  document.getElementById('player-max-hp').textContent = combat.maxHp;
+  document.getElementById('player-hp').textContent = combat.playerHp;
+  updateHpBars();
+  document.getElementById('combat-log').innerHTML = '';
+  addCombatLog(`⚔️ You engage the ${m.name}!`, 'log-event');
+  buildMonsterGrid();
+
+  // Start combat loop
+  if (combat.timer) clearInterval(combat.timer);
+  combat.attackTimer = 0;
+  combat.timer = setInterval(combatTick, 100);
+}
+
+let combatTickAccum = 0;
+function combatTick() {
+  if (!combat.active || !combat.monster) return;
+  combatTickAccum += 100;
+  const attackInterval = 2400; // 2.4s per attack (OSRS tick system simplified)
+
+  if (combatTickAccum >= attackInterval) {
+    combatTickAccum = 0;
+    // Player attacks
+    playerAttack();
+    // Monster attacks (slightly offset)
+    setTimeout(monsterAttack, 600);
+  }
+}
+
+function playerAttack() {
+  const acc = getAccuracy();
+  const hit = Math.random() * 100 < acc;
+  if (!hit) {
+    addCombatLog(`🗡️ You miss the ${combat.monster.name}.`, 'log-dmg-player');
+  } else {
+    const maxHit = getMaxHit();
+    const dmg = Math.floor(Math.random() * (maxHit + 1));
+    combat.monsterHp -= dmg;
+    addCombatLog(`🗡️ You hit the ${combat.monster.name} for <b>${dmg}</b> damage.`, 'log-dmg-player');
+
+    // XP
+    const xpBase = dmg * 4;
+    if (G.combatStyle === 'accurate') addXp('atk', xpBase);
+    else if (G.combatStyle === 'aggressive') addXp('str', xpBase);
+    else addXp('def', xpBase);
+    addXp('hp', Math.floor(xpBase / 3));
+
+    if (combat.monsterHp <= 0) {
+      monsterDied();
+      return;
+    }
+  }
+  updateHpBars();
+}
+
+function monsterAttack() {
+  if (!combat.active || !combat.monster || combat.monsterHp <= 0) return;
+  const m = combat.monster;
+  const defLvl = skillLevel('def');
+  const defBonus = G.equippedBonuses.defBonus;
+  const evade = Math.min(70, 10 + defLvl * 0.3 + defBonus * 0.2);
+  const hit = Math.random() * 100 > evade;
+
+  if (!hit) {
+    addCombatLog(`🛡️ You block the ${m.name}'s attack!`, 'log-dmg-monster');
+  } else {
+    const dmg = Math.floor(Math.random() * m.maxHit) + 1;
+    combat.playerHp -= dmg;
+    addCombatLog(`💥 ${m.name} hits you for <b>${dmg}</b> damage!`, 'log-dmg-monster');
+
+    // Auto-eat check
+    autoEat();
+
+    if (combat.playerHp <= 0) {
+      playerDied();
+      return;
+    }
+  }
+  updateHpBars();
+}
+
+function autoEat() {
+  if (combat.playerHp / combat.maxHp > 0.5) return;
+  // Find best food in bank
+  const foods = Object.entries(FOOD_HEAL)
+    .filter(([item, heal]) => bankQty(item) > 0)
+    .sort((a,b) => b[1]-a[1]);
+  if (foods.length === 0) {
+    document.getElementById('auto-eat-info').textContent = 'No food in bank';
+    return;
+  }
+  const [foodItem, heal] = foods[0];
+  G.bank[foodItem]--;
+  if (G.bank[foodItem] <= 0) delete G.bank[foodItem];
+  combat.playerHp = Math.min(combat.maxHp, combat.playerHp + heal);
+  addCombatLog(`🍖 Auto-eat: +${heal} HP (${bankMeta[foodItem]?.name || foodItem})`, 'log-event');
+  updateHpBars();
+  updateAutoEatInfo();
+}
+
+function updateAutoEatInfo() {
+  const foods = Object.entries(FOOD_HEAL)
+    .filter(([item]) => bankQty(item) > 0)
+    .sort((a,b) => b[1]-a[1]);
+  const el = document.getElementById('auto-eat-info');
+  if (foods.length > 0) {
+    const [item, heal] = foods[0];
+    el.textContent = `${bankMeta[item]?.name || item} (+${heal} HP) x${bankQty(item)}`;
+  } else {
+    el.textContent = 'No food in bank';
+  }
+}
+
+function monsterDied() {
+  const m = combat.monster;
+  addCombatLog(`☠️ You defeated the ${m.name}!`, 'log-event');
+
+  // GP loot
+  const gp = Math.floor(Math.random() * (m.gp[1] - m.gp[0])) + m.gp[0];
+  G.gold += gp;
+  addCombatLog(`💰 Looted ${gp} gp.`, 'log-loot');
+  updateGoldDisplay();
+
+  // Item loot
+  m.loot.forEach(drop => {
+    if (Math.random() < drop.chance) {
+      const qty = drop.qty;
+      addToBank(drop.item, qty, drop.name, drop.icon);
+      addCombatLog(`🎁 Looted: ${drop.icon} ${qty}x ${drop.name}`, 'log-loot');
+      notify(`🎁 ${qty}x ${drop.name}`, 'loot');
+    }
+  });
+  notify(`☠️ ${m.name} defeated!`);
+  addEvent(`⚔️ Defeated ${m.name} (+${gp} gp)`);
+
+  // Reset monster, keep fighting
+  setTimeout(() => {
+    if (!combat.active) return;
+    combat.monsterHp = m.hp;
+    document.getElementById('monster-hp').textContent = m.hp;
+    updateHpBars();
+    addCombatLog(`🔄 A new ${m.name} appears!`, 'log-event');
+  }, 1000);
+}
+
+function playerDied() {
+  addCombatLog(`💀 You have been defeated!`, 'log-event');
+  combat.playerHp = 0;
+  updateHpBars();
+  notify('💀 You died! Respawning...', '');
+  addEvent('💀 Died in combat');
+  stopCombat();
+  // Respawn with some HP
+  setTimeout(() => {
+    combat.playerHp = Math.ceil(getPlayerMaxHp() * 0.5);
+    document.getElementById('player-hp').textContent = combat.playerHp;
+    updateHpBars();
+    addCombatLog('You respawn at Lumbridge.', 'log-event');
+    notify('You respawned!');
+  }, 2000);
+}
+
+function stopCombat() {
+  combat.active = false;
+  if (combat.timer) { clearInterval(combat.timer); combat.timer = null; }
+  combat.monster = null;
+  document.getElementById('monster-name').textContent = '— No Target —';
+  document.getElementById('monster-icon').textContent = '❓';
+  document.getElementById('monster-hp').textContent = '0';
+  document.getElementById('monster-max-hp').textContent = '0';
+  document.getElementById('monster-hp-bar').style.width = '0%';
+  buildMonsterGrid();
+}
+
+function updateHpBars() {
+  const m = combat.monster;
+  if (m) {
+    const mPct = Math.max(0, combat.monsterHp / m.hp * 100);
+    document.getElementById('monster-hp-bar').style.width = mPct + '%';
+    document.getElementById('monster-hp').textContent = Math.max(0, combat.monsterHp);
+  }
+  const pPct = Math.max(0, combat.playerHp / getPlayerMaxHp() * 100);
+  document.getElementById('player-hp-bar').style.width = pPct + '%';
+  document.getElementById('player-hp').textContent = Math.max(0, combat.playerHp);
+  updateAutoEatInfo();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GOLD / TIME
+// ═══════════════════════════════════════════════════════════
+function updateGoldDisplay() {
+  const txt = fmtNum(G.gold) + ' gp';
+  document.getElementById('gold-display').textContent = txt;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MAIN LOOP
+// ═══════════════════════════════════════════════════════════
+function gameLoop() {
+  // Tick all active skill actions
+  ['wc','fish','mine','smith','cook','fm'].forEach(skill => {
+    if (activeActions[skill]) tickSkillAction(skill);
+  });
+
+  // Time played
+  G.timePlayed++;
+  const mins = Math.floor(G.timePlayed / 60);
+  const secs = G.timePlayed % 60;
+  document.getElementById('time-played').textContent = `${mins}:${secs.toString().padStart(2,'0')}`;
+
+  // Auto-save every 30s
+  if (G.timePlayed % 30 === 0) saveGame();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SAVE / LOAD
+// ═══════════════════════════════════════════════════════════
+function saveGame() {
+  try {
+    localStorage.setItem('rsIdle_save', JSON.stringify({ G, bankMeta }));
+  } catch(e) {}
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem('rsIdle_save');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.G) {
+      Object.assign(G, data.G);
+      // Restore bank meta
+      if (data.bankMeta) Object.assign(bankMeta, data.bankMeta);
+      // Restore combat HP
+      combat.playerHp = getPlayerMaxHp();
+    }
+    notify('Game loaded!', '');
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+function init() {
+  loadGame();
+
+  // Build all grids
+  buildSkillGrid('wc', TREES, 'wc', 'chopping');
+  buildSkillGrid('fish', FISH_SPOTS, 'fish', 'fishing');
+  buildSkillGrid('mine', ORES, 'mine', '');
+  renderSmithGrid();
+  renderCookGrid();
+  renderFmGrid();
+  buildMonsterGrid();
+  renderSkillsOverview();
+  renderCombatSkillDisplay();
+
+  // Init combat HP
+  combat.playerHp = getPlayerMaxHp();
+  combat.maxHp = getPlayerMaxHp();
+  document.getElementById('player-hp').textContent = combat.playerHp;
+  document.getElementById('player-max-hp').textContent = combat.maxHp;
+
+  // Update all skill UIs
+  SKILLS_DEF.forEach(s => updateSkillUI(s.id));
+  updateGoldDisplay();
+  updateCombatStats();
+
+  // Main game loop (every 100ms)
+  setInterval(gameLoop, 1000);
+
+  // Faster tick for progress bars
+  setInterval(() => {
+    ['wc','fish','mine','smith','cook','fm'].forEach(skill => {
+      if (activeActions[skill]) {
+        const a = activeActions[skill];
+        const elapsed = Date.now() - a.startTime;
+        const pct = Math.min(elapsed / a.def.time * 100, 100);
+        const bar = document.getElementById(`${skill}-progress`);
+        const pctEl = document.getElementById(`${skill}-pct`);
+        if (bar) bar.style.width = pct + '%';
+        if (pctEl) pctEl.textContent = Math.floor(pct) + '%';
+        document.querySelectorAll(`#${skill}-grid .action-btn.doing .action-progress`).forEach(b => b.style.width = pct+'%');
+      }
+    });
+  }, 50);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  KICK-OFF
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Give starter items for demo feel
+  const hasPlayed = localStorage.getItem('rsIdle_save');
+  if (!hasPlayed) {
+    addToBank('logs', 5, 'Logs', '🪵');
+    addToBank('copper_ore', 5, 'Copper Ore', '🪨');
+    addToBank('tin_ore', 5, 'Tin Ore', '🪨');
+    G.gold = 100;
+  }
+  init();
+});
+</script>
+</body>
+</html>
