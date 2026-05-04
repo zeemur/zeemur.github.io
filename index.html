@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;600&family=IM+Fell+English&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#2c1a0e;font-family:'IM Fell English',serif;color:#f0d68c;min-height:100vh;overflow:hidden;}
+  #game{display:grid;grid-template-columns:180px 1fr 200px;grid-template-rows:40px 1fr 120px;height:100vh;gap:2px;background:#1a0d05;}
+  
+  /* TOP BAR */
+  #topbar{grid-column:1/-1;background:#3d2010;border-bottom:2px solid #8b6914;display:flex;align-items:center;padding:0 8px;gap:12px;}
+  #topbar h1{font-family:'Cinzel',serif;font-size:16px;color:#f0d68c;letter-spacing:2px;}
+  .topstat{font-size:11px;color:#d4b04a;margin-left:auto;display:flex;gap:12px;}
+  .topstat span{color:#f0d68c;}
+
+  /* LEFT PANEL - Skills */
+  #skills-panel{background:#3d2010;border-right:2px solid #8b6914;overflow-y:auto;padding:4px;}
+  #skills-panel h2{font-family:'Cinzel',serif;font-size:11px;color:#d4b04a;text-align:center;padding:4px;border-bottom:1px solid #8b6914;margin-bottom:4px;}
+  .skill-row{display:flex;align-items:center;gap:4px;padding:3px 4px;border:1px solid #5a3a1a;border-radius:2px;margin-bottom:2px;cursor:pointer;transition:background 0.15s;}
+  .skill-row:hover{background:#4d2a14;}
+  .skill-row.active-skill{background:#5d3a1a;border-color:#d4b04a;}
+  .skill-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .skill-info{flex:1;min-width:0;}
+  .skill-name{font-size:9px;color:#d4b04a;line-height:1;}
+  .skill-level{font-size:13px;font-weight:bold;color:#f0d68c;line-height:1.2;}
+  .skill-xpbar{height:3px;background:#1a0d05;border-radius:1px;margin-top:2px;}
+  .skill-xpfill{height:100%;background:#d4b04a;border-radius:1px;transition:width 0.3s;}
+
+  /* MAIN - Combat/Action area */
+  #main{background:#2c1a0e;display:flex;flex-direction:column;overflow:hidden;}
+  #tab-bar{display:flex;background:#3d2010;border-bottom:2px solid #8b6914;}
+  .tab-btn{flex:1;padding:5px;font-size:10px;font-family:'Cinzel',serif;color:#a07840;background:none;border:none;border-right:1px solid #5a3a1a;cursor:pointer;transition:all 0.15s;}
+  .tab-btn:hover{background:#4d2a14;color:#d4b04a;}
+  .tab-btn.active{background:#2c1a0e;color:#f0d68c;border-bottom:2px solid #d4b04a;}
+  #tab-content{flex:1;overflow:hidden;position:relative;}
+  .tab-pane{display:none;height:100%;overflow-y:auto;padding:8px;}
+  .tab-pane.active{display:block;}
+
+  /* Combat Zone */
+  #combat-zone{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;}
+  #mob-display{text-align:center;width:100%;}
+  .mob-name{font-family:'Cinzel',serif;font-size:16px;color:#e8c060;margin-bottom:4px;}
+  .mob-sprite{font-size:64px;line-height:1;cursor:pointer;transition:transform 0.1s;user-select:none;display:inline-block;filter:drop-shadow(0 0 8px rgba(255,150,0,0.3));}
+  .mob-sprite:active{transform:scale(0.92);}
+  .mob-sprite.hit-flash{animation:hitflash 0.15s;}
+  @keyframes hitflash{0%{filter:drop-shadow(0 0 12px #ff6600) brightness(2);}100%{filter:drop-shadow(0 0 8px rgba(255,150,0,0.3));}}
+  
+  .hp-bar-wrap{width:100%;max-width:280px;margin:0 auto;}
+  .hp-label{display:flex;justify-content:space-between;font-size:11px;color:#d4b04a;margin-bottom:2px;}
+  .hp-bar{height:14px;background:#1a0d05;border:1px solid #5a3a1a;border-radius:2px;overflow:hidden;}
+  .hp-fill{height:100%;background:linear-gradient(90deg,#8b0000,#cc0000);transition:width 0.3s;}
+  
+  .combat-stats-row{display:flex;gap:8px;font-size:11px;}
+  .cstat{background:#3d2010;border:1px solid #5a3a1a;border-radius:2px;padding:3px 6px;text-align:center;}
+  .cstat-label{color:#a07840;font-size:9px;}
+  .cstat-val{color:#f0d68c;font-size:13px;font-weight:bold;}
+  
+  #attack-btn{padding:8px 24px;font-family:'Cinzel',serif;font-size:13px;background:#4d2010;border:2px solid #8b6914;color:#f0d68c;cursor:pointer;border-radius:2px;transition:all 0.15s;}
+  #attack-btn:hover{background:#6d3018;border-color:#d4b04a;}
+  #attack-btn:active{transform:scale(0.97);}
+  
+  .dmg-float{position:absolute;font-family:'Cinzel',serif;font-weight:bold;font-size:18px;color:#ff4444;pointer-events:none;animation:floatup 1s ease-out forwards;}
+  @keyframes floatup{0%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-50px);}}
+  
+  .combat-log{width:100%;max-width:320px;max-height:80px;overflow-y:auto;background:#1a0d05;border:1px solid #3d2010;border-radius:2px;padding:4px;}
+  .log-line{font-size:10px;line-height:1.4;color:#c8a05c;}
+  .log-line.dmg{color:#ff8844;}
+  .log-line.xp{color:#88cc44;}
+  .log-line.loot{color:#44aaff;}
+
+  /* Skills Training tab */
+  .training-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .train-card{background:#3d2010;border:1px solid #5a3a1a;border-radius:2px;padding:8px;cursor:pointer;transition:all 0.15s;}
+  .train-card:hover{border-color:#d4b04a;background:#4d2a14;}
+  .train-card.active{border-color:#d4b04a;background:#5d3020;}
+  .train-icon{font-size:24px;margin-bottom:4px;}
+  .train-name{font-family:'Cinzel',serif;font-size:11px;color:#d4b04a;}
+  .train-desc{font-size:9px;color:#a07840;margin-top:2px;}
+  .train-xp{font-size:10px;color:#88cc44;margin-top:2px;}
+
+  /* Equipment tab */
+  .equip-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:200px;margin:0 auto 8px;}
+  .equip-slot{background:#3d2010;border:1px solid #5a3a1a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:all 0.15s;}
+  .equip-slot:hover{border-color:#d4b04a;}
+  .equip-slot.empty{opacity:0.4;}
+  .equip-slot-label{font-size:8px;color:#a07840;text-align:center;margin-top:1px;}
+  
+  /* Inventory */
+  .inv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;}
+  .inv-slot{background:#3d2010;border:1px solid #5a3a1a;border-radius:2px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;position:relative;transition:all 0.15s;}
+  .inv-slot:hover{border-color:#d4b04a;}
+  .inv-count{position:absolute;bottom:1px;right:2px;font-size:8px;color:#f0d68c;}
+  
+  /* Shop */
+  .shop-item{display:flex;align-items:center;gap:8px;background:#3d2010;border:1px solid #5a3a1a;border-radius:2px;padding:6px;margin-bottom:4px;cursor:pointer;transition:all 0.15s;}
+  .shop-item:hover{border-color:#d4b04a;background:#4d2a14;}
+  .shop-item-icon{font-size:24px;flex-shrink:0;}
+  .shop-item-info{flex:1;}
+  .shop-item-name{font-family:'Cinzel',serif;font-size:11px;color:#d4b04a;}
+  .shop-item-desc{font-size:9px;color:#a07840;}
+  .shop-item-cost{font-size:11px;color:#f0d68c;text-align:right;}
+  .shop-item-cost span{color:#ffd700;}
+
+  /* RIGHT PANEL */
+  #right-panel{background:#3d2010;border-left:2px solid #8b6914;overflow-y:auto;padding:4px;}
+  #right-panel h2{font-family:'Cinzel',serif;font-size:11px;color:#d4b04a;text-align:center;padding:4px;border-bottom:1px solid #8b6914;margin-bottom:4px;}
+  .stat-row{display:flex;justify-content:space-between;font-size:10px;padding:2px 4px;border-bottom:1px solid #2c1a0e;}
+  .stat-row .slabel{color:#a07840;}
+  .stat-row .sval{color:#f0d68c;}
+  
+  .mob-list-item{display:flex;align-items:center;gap:4px;padding:3px;border:1px solid #2c1a0e;border-radius:2px;margin-bottom:2px;cursor:pointer;font-size:10px;transition:all 0.15s;}
+  .mob-list-item:hover{background:#4d2a14;border-color:#5a3a1a;}
+  .mob-list-item.selected{background:#5d3020;border-color:#8b6914;}
+  .mob-sprite-sm{font-size:16px;}
+  .mob-info-sm{flex:1;}
+  .mob-name-sm{color:#d4b04a;font-size:10px;}
+  .mob-level-sm{color:#a07840;font-size:9px;}
+  .mob-lock{color:#5a3a1a;font-size:9px;}
+
+  /* BOTTOM BAR */
+  #bottom-bar{grid-column:1/-1;background:#3d2010;border-top:2px solid #8b6914;display:flex;align-items:center;padding:4px 8px;gap:8px;overflow:hidden;}
+  .player-hp-section{display:flex;flex-direction:column;gap:2px;min-width:120px;}
+  .player-stat-bar{height:12px;background:#1a0d05;border:1px solid #5a3a1a;border-radius:2px;overflow:hidden;width:120px;}
+  .player-hp-bar-fill{height:100%;background:#cc0000;transition:width 0.3s;}
+  .player-prayer-fill{height:100%;background:#4488cc;transition:width 0.3s;}
+  .bar-label{font-size:9px;color:#a07840;}
+  .gold-display{margin-left:auto;font-family:'Cinzel',serif;font-size:13px;color:#ffd700;}
+  .idle-status{font-size:10px;color:#88cc44;margin-left:8px;}
+  
+  ::-webkit-scrollbar{width:4px;}
+  ::-webkit-scrollbar-track{background:#1a0d05;}
+  ::-webkit-scrollbar-thumb{background:#5a3a1a;}
+
+  .xp-popup{position:fixed;pointer-events:none;font-family:'Cinzel',serif;font-size:13px;font-weight:bold;color:#88cc44;animation:xpfloat 1.2s ease-out forwards;z-index:100;}
+  @keyframes xpfloat{0%{opacity:1;transform:translateY(0) scale(1);}50%{opacity:1;transform:translateY(-30px) scale(1.1);}100%{opacity:0;transform:translateY(-60px) scale(0.9);}}
+
+  .section-title{font-family:'Cinzel',serif;font-size:11px;color:#d4b04a;border-bottom:1px solid #5a3a1a;padding-bottom:3px;margin-bottom:6px;}
+  .unlock-notice{background:#2c4020;border:1px solid #44aa22;border-radius:2px;padding:4px 6px;font-size:10px;color:#88cc44;margin-bottom:4px;}
+  .boss-warning{background:#4d1010;border:1px solid #aa2222;border-radius:2px;padding:4px 6px;font-size:10px;color:#ff8844;margin-bottom:4px;text-align:center;}
+</style>
+</head>
+<body>
+<div id="game">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <h1>⚔ OLDSCAPE IDLE</h1>
+    <div class="topstat">
+      <span id="total-level-display">Total Level: 32</span>
+      <span id="combat-level-display">Combat: 3</span>
+    </div>
+  </div>
+
+  <!-- LEFT: Skills -->
+  <div id="skills-panel">
+    <h2>SKILLS</h2>
+    <div id="skills-list"></div>
+  </div>
+
+  <!-- CENTER: Main content -->
+  <div id="main">
+    <div id="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('combat')">⚔ Combat</button>
+      <button class="tab-btn" onclick="switchTab('train')">🔨 Train</button>
+      <button class="tab-btn" onclick="switchTab('equip')">🛡 Equip</button>
+      <button class="tab-btn" onclick="switchTab('shop')">🏪 Shop</button>
+    </div>
+    <div id="tab-content">
+
+      <!-- COMBAT TAB -->
+      <div id="tab-combat" class="tab-pane active" style="padding:0;">
+        <div id="combat-zone">
+          <div id="mob-display">
+            <div class="mob-name" id="mob-name">Chicken</div>
+            <div id="mob-sprite-wrap" style="position:relative;display:inline-block;">
+              <div class="mob-sprite" id="mob-sprite" onclick="playerAttack()">🐔</div>
+            </div>
+          </div>
+          <div class="hp-bar-wrap">
+            <div class="hp-label"><span id="mob-hp-text">0/10 HP</span><span id="mob-cb">Lv. 1</span></div>
+            <div class="hp-bar"><div class="hp-fill" id="mob-hp-bar" style="width:100%"></div></div>
+          </div>
+          <div class="combat-stats-row">
+            <div class="cstat"><div class="cstat-label">ATK</div><div class="cstat-val" id="disp-atk">1</div></div>
+            <div class="cstat"><div class="cstat-label">STR</div><div class="cstat-val" id="disp-str">1</div></div>
+            <div class="cstat"><div class="cstat-label">DEF</div><div class="cstat-val" id="disp-def">1</div></div>
+            <div class="cstat"><div class="cstat-label">MAX HIT</div><div class="cstat-val" id="disp-maxhit">1</div></div>
+            <div class="cstat"><div class="cstat-label">ACCURACY</div><div class="cstat-val" id="disp-acc">75%</div></div>
+          </div>
+          <button id="attack-btn" onclick="playerAttack()">⚔ ATTACK!</button>
+          <div class="combat-log" id="combat-log"></div>
+        </div>
+      </div>
+
+      <!-- TRAIN TAB -->
+      <div id="tab-train" class="tab-pane">
+        <div class="section-title">Non-Combat Skills</div>
+        <div class="training-grid" id="training-grid"></div>
+      </div>
+
+      <!-- EQUIP TAB -->
+      <div id="tab-equip" class="tab-pane">
+        <div class="section-title">Equipment</div>
+        <div style="display:flex;gap:12px;">
+          <div>
+            <div class="equip-grid" id="equip-slots"></div>
+          </div>
+          <div style="flex:1;">
+            <div class="section-title">Inventory</div>
+            <div class="inv-grid" id="inv-slots"></div>
+          </div>
+        </div>
+        <div class="section-title" style="margin-top:8px;">Bonuses</div>
+        <div id="equip-bonuses" style="font-size:10px;color:#a07840;"></div>
+      </div>
+
+      <!-- SHOP TAB -->
+      <div id="tab-shop" class="tab-pane">
+        <div class="section-title">Bob's Brilliant Axes (& More)</div>
+        <div id="shop-items"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT: Mob selector + stats -->
+  <div id="right-panel">
+    <h2>MONSTERS</h2>
+    <div id="mob-list"></div>
+    <h2 style="margin-top:8px;">PLAYER STATS</h2>
+    <div id="player-stats-list"></div>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div id="bottom-bar">
+    <div class="player-hp-section">
+      <div class="bar-label">❤ HP <span id="hp-label-val">10/10</span></div>
+      <div class="player-stat-bar"><div class="player-hp-bar-fill" id="player-hp-bar" style="width:100%"></div></div>
+      <div class="bar-label">🙏 Prayer <span id="prayer-label-val">10/10</span></div>
+      <div class="player-stat-bar"><div class="player-prayer-fill" id="player-prayer-bar" style="width:100%"></div></div>
+    </div>
+    <div style="margin-left:8px;">
+      <div class="bar-label" id="auto-combat-label">⚡ Auto-combat: OFF</div>
+      <button style="font-size:10px;padding:2px 6px;font-family:inherit;background:#2c4020;border:1px solid #44aa22;color:#88cc44;cursor:pointer;border-radius:2px;" onclick="toggleAuto()">Toggle Auto</button>
+    </div>
+    <div style="margin-left:8px;">
+      <div class="bar-label" id="idle-train-label">🔨 Idle Training: None</div>
+      <button style="font-size:10px;padding:2px 6px;font-family:inherit;background:#202040;border:1px solid #4444aa;color:#8888cc;cursor:pointer;border-radius:2px;" onclick="switchTab('train')">Set Training</button>
+    </div>
+    <div class="gold-display">🪙 <span id="gold-display">0</span> gp</div>
+    <div class="idle-status" id="idle-status"></div>
+  </div>
+</div>
+
+<script>
+const SKILLS = [
+  {id:'attack',name:'Attack',icon:'⚔',xp:0,level:1,color:'#cc4444'},
+  {id:'strength',name:'Strength',icon:'💪',xp:0,level:1,color:'#cc4444'},
+  {id:'defence',name:'Defence',icon:'🛡',xp:0,level:1,color:'#4488cc'},
+  {id:'hitpoints',name:'Hitpoints',icon:'❤',xp:83,level:10,color:'#cc4444'},
+  {id:'prayer',name:'Prayer',icon:'🙏',xp:0,level:1,color:'#ccaa44'},
+  {id:'magic',name:'Magic',icon:'🔮',xp:0,level:1,color:'#8844cc'},
+  {id:'ranged',name:'Ranged',icon:'🏹',xp:0,level:1,color:'#44aa44'},
+  {id:'woodcutting',name:'Woodcutting',icon:'🪓',xp:0,level:1,color:'#aa7744'},
+  {id:'fishing',name:'Fishing',icon:'🎣',xp:0,level:1,color:'#4488cc'},
+  {id:'mining',name:'Mining',icon:'⛏',xp:0,level:1,color:'#888888'},
+  {id:'cooking',name:'Cooking',icon:'🍳',xp:0,level:1,color:'#cc8844'},
+  {id:'firemaking',name:'Firemaking',icon:'🔥',xp:0,level:1,color:'#cc6622'},
+  {id:'agility',name:'Agility',icon:'🏃',xp:0,level:1,color:'#4488aa'},
+  {id:'thieving',name:'Thieving',icon:'🗝',xp:0,level:1,color:'#664488'},
+  {id:'crafting',name:'Crafting',icon:'💎',xp:0,level:1,color:'#aacc44'},
+  {id:'smithing',name:'Smithing',icon:'🔨',xp:0,level:1,color:'#888844'},
+  {id:'herblore',name:'Herblore',icon:'🌿',xp:0,level:1,color:'#44aa66'},
+  {id:'slayer',name:'Slayer',icon:'💀',xp:0,level:1,color:'#884422'},
+];
+
+const XP_TABLE = [0,83,174,276,388,512,650,801,969,1154,1358,1584,1833,2107,2411,2746,3115,3523,3973,4470,5018,5624,6291,7028,7842,8740,9730,10824,12031,13363,14833,16456,18247,20224,22406,24815,27473,30408,33648,37224,41171,45529,50339,55589,61512,67983,75127,83014,91721,101333,112300,124660,138230,153796,170630,189200,211708,236678,264566,295890];
+
+function xpForLevel(lvl){return lvl>=2?XP_TABLE[lvl-1]:0;}
+function levelFromXp(xp){let l=1;for(let i=1;i<99;i++){if(xp>=XP_TABLE[i])l=i+1;else break;}return Math.min(l,99);}
+function xpToNextLevel(skill){let l=skill.level;if(l>=99)return 0;return XP_TABLE[l]-skill.xp;}
+function xpProgress(skill){let l=skill.level;if(l>=99)return 1;let prev=XP_TABLE[l-1]||0,next=XP_TABLE[l];return(skill.xp-prev)/(next-prev);}
+
+const MOBS = [
+  {id:'chicken',name:'Chicken',sprite:'🐔',level:1,hp:3,maxHp:3,atk:1,def:0,reqCb:0,xpAtk:3,xpStr:3,xpDef:0,xpHp:1,drops:[{item:'bones',chance:1,emoji:'🦴'},{item:'feathers',chance:0.9,count:5,emoji:'🪶'},{item:'raw_chicken',chance:0.9,emoji:'🍗'},{item:'coins',chance:0.5,count:3,emoji:'🪙'}]},
+  {id:'goblin',name:'Goblin',sprite:'👺',level:2,hp:5,maxHp:5,atk:2,def:1,reqCb:0,xpAtk:4,xpStr:4,xpDef:1,xpHp:2,drops:[{item:'bones',chance:1,emoji:'🦴'},{item:'coins',chance:0.7,count:5,emoji:'🪙'},{item:'bronze_sword',chance:0.05,emoji:'⚔'}]},
+  {id:'cow',name:'Cow',sprite:'🐄',level:2,hp:8,maxHp:8,atk:1,def:1,reqCb:0,xpAtk:4,xpStr:4,xpDef:1,xpHp:2,drops:[{item:'bones',chance:1,emoji:'🦴'},{item:'raw_beef',chance:1,emoji:'🥩'},{item:'cowhide',chance:1,emoji:'🟫'}]},
+  {id:'guard',name:'Guard',sprite:'💂',level:19,hp:20,maxHp:20,atk:18,def:15,reqCb:15,xpAtk:30,xpStr:30,xpDef:8,xpHp:10,drops:[{item:'coins',chance:0.8,count:15,emoji:'🪙'},{item:'bones',chance:1,emoji:'🦴'},{item:'iron_sword',chance:0.08,emoji:'🗡'}]},
+  {id:'hill_giant',name:'Hill Giant',sprite:'🧟',level:28,hp:35,maxHp:35,atk:25,def:20,reqCb:20,xpAtk:55,xpStr:55,xpDef:12,xpHp:18,drops:[{item:'big_bones',chance:1,emoji:'🦴'},{item:'coins',chance:0.9,count:30,emoji:'🪙'},{item:'giant_key',chance:0.02,emoji:'🗝'}]},
+  {id:'moss_giant',name:'Moss Giant',sprite:'🌿',level:42,hp:60,maxHp:60,atk:35,def:28,reqCb:30,xpAtk:100,xpStr:100,xpDef:20,xpHp:32,drops:[{item:'big_bones',chance:1,emoji:'🦴'},{item:'coins',chance:0.9,count:60,emoji:'🪙'},{item:'nature_rune',chance:0.15,emoji:'🌿'}]},
+  {id:'black_knight',name:'Black Knight',sprite:'🧙',level:52,hp:80,maxHp:80,atk:48,def:40,reqCb:40,xpAtk:160,xpStr:160,xpDef:35,xpHp:48,drops:[{item:'bones',chance:1,emoji:'🦴'},{item:'coins',chance:0.9,count:80,emoji:'🪙'},{item:'black_sword',chance:0.05,emoji:'⚔'}]},
+  {id:'lesser_demon',name:'Lesser Demon',sprite:'😈',level:82,hp:120,maxHp:120,atk:65,def:55,reqCb:55,xpAtk:280,xpStr:280,xpDef:60,xpHp:80,drops:[{item:'ashes',chance:1,emoji:'⬛'},{item:'coins',chance:0.9,count:150,emoji:'🪙'},{item:'rune_med',chance:0.01,emoji:'⛑'}]},
+  {id:'king_black_dragon',name:'King Black Dragon',sprite:'🐉',level:276,hp:240,maxHp:240,atk:120,def:100,reqCb:70,xpAtk:960,xpStr:960,xpDef:240,xpHp:288,boss:true,drops:[{item:'dragon_bones',chance:1,emoji:'🦴'},{item:'coins',chance:1,count:500,emoji:'🪙'},{item:'kbd_head',chance:0.02,emoji:'👑'},{item:'draconic_visage',chance:0.005,emoji:'💎'}]},
+  {id:'zulrah',name:'Zulrah',sprite:'🐍',level:725,hp:500,maxHp:500,atk:150,def:130,reqCb:85,xpAtk:2000,xpStr:2000,xpDef:500,xpHp:600,boss:true,drops:[{item:'zulrah_scales',chance:1,count:200,emoji:'💚'},{item:'coins',chance:1,count:1000,emoji:'🪙'},{item:'tanzanite_fang',chance:0.01,emoji:'🌙'}]},
+];
+
+const TRAINING_ACTIONS = [
+  {id:'chop_logs',skill:'woodcutting',name:'Chop Logs',icon:'🪓',desc:'Chop normal trees',xpPer:25,timeSec:3,reqLevel:1,giveItem:{item:'logs',emoji:'🪵',count:1}},
+  {id:'chop_oak',skill:'woodcutting',name:'Chop Oak',icon:'🌳',desc:'Chop oak trees',xpPer:37.5,timeSec:4,reqLevel:15,giveItem:{item:'oak_logs',emoji:'🪵',count:1}},
+  {id:'fish_shrimp',skill:'fishing',name:'Fish Shrimps',icon:'🎣',desc:'Catch shrimps',xpPer:10,timeSec:3,reqLevel:1,giveItem:{item:'raw_shrimp',emoji:'🦐',count:1}},
+  {id:'fish_trout',skill:'fishing',name:'Fish Trout',icon:'🎣',desc:'Catch trout',xpPer:50,timeSec:4,reqLevel:20,giveItem:{item:'raw_trout',emoji:'🐟',count:1}},
+  {id:'mine_copper',skill:'mining',name:'Mine Copper',icon:'⛏',desc:'Mine copper ore',xpPer:17.5,timeSec:3,reqLevel:1,giveItem:{item:'copper_ore',emoji:'🟤',count:1}},
+  {id:'mine_iron',skill:'mining',name:'Mine Iron',icon:'⛏',desc:'Mine iron ore',xpPer:35,timeSec:4,reqLevel:15,giveItem:{item:'iron_ore',emoji:'⬛',count:1}},
+  {id:'cook_shrimp',skill:'cooking',name:'Cook Shrimps',icon:'🍳',desc:'Cook raw shrimps',xpPer:30,timeSec:2,reqLevel:1},
+  {id:'burn_logs',skill:'firemaking',name:'Burn Logs',icon:'🔥',desc:'Burn normal logs',xpPer:40,timeSec:2,reqLevel:1},
+  {id:'agility_gnome',skill:'agility',name:'Gnome Agility',icon:'🏃',desc:'Run gnome course',xpPer:86,timeSec:6,reqLevel:1},
+  {id:'thieve_man',skill:'thieving',name:'Pickpocket Man',icon:'🗝',desc:'Pickpocket a man',xpPer:8,timeSec:2,reqLevel:1,giveItem:{item:'coins',emoji:'🪙',count:3}},
+];
+
+const SHOP_ITEMS = [
+  {id:'bronze_sword',name:'Bronze Sword',icon:'⚔',desc:'+1 Attack bonus',cost:50,type:'weapon',bonus:{atk:1,str:1},slot:'weapon'},
+  {id:'iron_sword',name:'Iron Sword',icon:'🗡',desc:'+5 Attack bonus',cost:200,type:'weapon',bonus:{atk:5,str:3},slot:'weapon',reqLevel:10},
+  {id:'steel_sword',name:'Steel Sword',icon:'⚔',desc:'+12 Attack bonus',cost:800,type:'weapon',bonus:{atk:12,str:8},slot:'weapon',reqLevel:20},
+  {id:'mithril_sword',name:'Mithril Sword',icon:'⚔',desc:'+22 Attack bonus',cost:3000,type:'weapon',bonus:{atk:22,str:16},slot:'weapon',reqLevel:40},
+  {id:'rune_sword',name:'Rune Sword',icon:'⚔',desc:'+45 Attack bonus',cost:15000,type:'weapon',bonus:{atk:45,str:35},slot:'weapon',reqLevel:60},
+  {id:'leather_body',name:'Leather Body',icon:'🥋',desc:'+5 Defence bonus',cost:100,type:'armour',bonus:{def:5},slot:'body'},
+  {id:'iron_platebody',name:'Iron Platebody',icon:'🛡',desc:'+18 Defence bonus',cost:600,type:'armour',bonus:{def:18},slot:'body',reqLevel:20},
+  {id:'rune_platebody',name:'Rune Platebody',icon:'🛡',desc:'+80 Defence bonus',cost:40000,type:'armour',bonus:{def:80},slot:'body',reqLevel:60},
+  {id:'shark',name:'Shark',icon:'🦈',desc:'Heals 20 HP',cost:800,type:'food',heal:20,count:1},
+  {id:'prayer_pot',name:'Prayer Potion',icon:'🧪',desc:'Restores prayer',cost:300,type:'potion',effect:'prayer'},
+  {id:'strength_pot',name:'Strength Potion',icon:'💪',desc:'+3 Strength for 5 min',cost:200,type:'potion',effect:'strength'},
+];
+
+let state = {
+  skills: JSON.parse(JSON.stringify(SKILLS)),
+  player: {hp:10,maxHp:10,prayer:10,maxPrayer:10,gold:0,strBoost:0,strBoostTimer:0},
+  equipment: {weapon:null,body:null,legs:null,head:null,shield:null,cape:null,neck:null,feet:null,hands:null},
+  inventory: [],
+  currentMob: null,
+  mobHp: 0,
+  autoCombat: false,
+  idleTrain: null,
+  selectedMobId: 'chicken',
+  combatStyle: 'accurate',
+  combatTick: 0,
+  mobRespawnTimer: 0,
+  inCombat: false,
+  notifications: [],
+};
+
+function getSkill(id){return state.skills.find(s=>s.id===id);}
+function getStat(id){return getSkill(id)?.level||1;}
+
+function addXp(skillId, amount){
+  let sk = getSkill(skillId);
+  if(!sk)return;
+  sk.xp += amount;
+  let newLevel = levelFromXp(sk.xp);
+  if(newLevel > sk.level){
+    let old = sk.level;
+    sk.level = newLevel;
+    addLog(`✨ LEVEL UP! ${sk.icon} ${sk.name} is now level ${newLevel}!`, 'xp');
+    if(skillId==='hitpoints') state.player.maxHp = 10 + (newLevel-10)*1;
+    showXpPopup(`+${amount} ${sk.name} XP`);
+    updateTotalLevel();
+  }
+  renderSkills();
+}
+
+function showXpPopup(text){
+  let el = document.createElement('div');
+  el.className='xp-popup';
+  el.textContent=text;
+  el.style.left = (120+Math.random()*200)+'px';
+  el.style.top = (120+Math.random()*60)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+}
+
+function getCombatLevel(){
+  let atk=getStat('attack'),str=getStat('strength'),def=getStat('defence'),hp=getStat('hitpoints'),pr=getStat('prayer'),rng=getStat('ranged'),mg=getStat('magic');
+  let base = 0.25*(def+hp+Math.floor(pr/2));
+  let melee = 0.325*(atk+str);
+  let range = 0.325*(Math.floor(rng*1.5));
+  let mage = 0.325*(Math.floor(mg*1.5));
+  return Math.floor(base+Math.max(melee,range,mage));
+}
+
+function getMaxHit(){
+  let str = getStat('strength') + (state.player.strBoost||0);
+  let strBonus = getEquipBonus('str');
+  return Math.floor(0.5 + str*(strBonus+64)/640);
+}
+
+function getAccuracy(){
+  let atk = getStat('attack');
+  let atkBonus = getEquipBonus('atk');
+  let mobDef = state.currentMob ? state.currentMob.def : 0;
+  let roll = (atk+8)*(atkBonus+64);
+  let defRoll = (mobDef+8)*64;
+  let acc = roll>defRoll ? 1-(defRoll+2)/(2*(roll+1)) : roll/(2*(defRoll+1));
+  return Math.min(0.99,Math.max(0.05,acc));
+}
+
+function getEquipBonus(stat){
+  let total=0;
+  for(let slot in state.equipment){
+    let item=state.equipment[slot];
+    if(item&&item.bonus&&item.bonus[stat]) total+=item.bonus[stat];
+  }
+  return total;
+}
+
+function spawnMob(){
+  let mobDef = MOBS.find(m=>m.id===state.selectedMobId)||MOBS[0];
+  state.currentMob = JSON.parse(JSON.stringify(mobDef));
+  state.mobHp = state.currentMob.maxHp;
+  state.inCombat = false;
+  renderMob();
+}
+
+function playerAttack(){
+  if(!state.currentMob) return;
+  state.inCombat = true;
+  let mob = state.currentMob;
+  let hit = 0;
+  let acc = getAccuracy();
+  if(Math.random()<acc){
+    let maxHit = getMaxHit();
+    hit = Math.floor(Math.random()*(maxHit+1));
+  }
+  state.mobHp = Math.max(0, state.mobHp-hit);
+  
+  let mobSprite = document.getElementById('mob-sprite');
+  mobSprite.classList.add('hit-flash');
+  setTimeout(()=>mobSprite.classList.remove('hit-flash'),200);
+  
+  if(hit>0){
+    addLog(`You hit the ${mob.name} for ${hit} damage.`,'dmg');
+    showDamageFloat(hit, true);
+  } else {
+    addLog(`You miss the ${mob.name}.`,'');
+  }
+
+  if(hit>0){
+    addXp('hitpoints', Math.floor(hit*1.33)*4);
+    addXp('attack', mob.xpAtk*4);
+    addXp('strength', mob.xpStr*2);
+    addXp('defence', mob.xpDef*4);
+  }
+
+  if(state.mobHp<=0){
+    onMobDied();
+    return;
+  }
+
+  setTimeout(()=>mobCounterAttack(mob),400);
+  renderMob();
+}
+
+function mobCounterAttack(mob){
+  if(state.mobHp<=0||!state.inCombat)return;
+  let mobHit=0;
+  let mobAcc=0.4+mob.atk/200;
+  let playerDef=getStat('defence');
+  let defBonus=getEquipBonus('def');
+  let eff=mobAcc*(1-playerDef*0.005)*(1-defBonus*0.003);
+  eff=Math.max(0.05,Math.min(0.95,eff));
+  if(Math.random()<eff){
+    mobHit=Math.floor(Math.random()*(mob.atk/3+1));
+  }
+  if(mobHit>0){
+    state.player.hp=Math.max(0,state.player.hp-mobHit);
+    addLog(`${mob.name} hits you for ${mobHit}.`,'dmg');
+    showDamageFloat(mobHit,false);
+  } else {
+    addLog(`${mob.name} misses.`,'');
+  }
+  if(state.player.hp<=0){
+    addLog('☠ You have died! Returning to lumbridge...','dmg');
+    state.player.hp=Math.floor(state.player.maxHp*0.5);
+    state.player.gold=Math.floor(state.player.gold*0.9);
+    state.inCombat=false;
+    spawnMob();
+  }
+  renderPlayerStats();
+}
+
+function showDamageFloat(amount, isPlayerHit){
+  let wrap=document.getElementById('mob-sprite-wrap');
+  if(!wrap)return;
+  let el=document.createElement('div');
+  el.className='dmg-float';
+  el.textContent=amount;
+  el.style.color=isPlayerHit?'#ff8844':'#ff4444';
+  el.style.left=(Math.random()*40+20)+'px';
+  el.style.top='0px';
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(),1000);
+}
+
+function onMobDied(){
+  let mob=state.currentMob;
+  addLog(`You have defeated the ${mob.name}!`,'xp');
+  
+  let drops=[];
+  for(let d of mob.drops){
+    if(Math.random()<d.chance){
+      let count=d.count||1;
+      drops.push({...d,count});
+      if(d.item==='coins'){
+        state.player.gold+=count;
+      } else {
+        addToInventory({item:d.item,emoji:d.emoji,count});
+      }
+    }
+  }
+  if(drops.length>0){
+    addLog(`Loot: ${drops.map(d=>`${d.emoji}${d.count>1?'x'+d.count:''}`).join(' ')}`,'loot');
+  }
+
+  state.inCombat=false;
+  state.currentMob=null;
+  renderPlayerStats();
+  
+  setTimeout(()=>{ spawnMob(); },1200);
+}
+
+function addToInventory(item){
+  let existing=state.inventory.find(i=>i.item===item.item);
+  if(existing){existing.count+=item.count;}
+  else{state.inventory.push({...item});}
+  renderInventory();
+}
+
+function addLog(msg,type){
+  let log=document.getElementById('combat-log');
+  let line=document.createElement('div');
+  line.className='log-line'+(type?' '+type:'');
+  line.textContent=msg;
+  log.appendChild(line);
+  while(log.children.length>30)log.removeChild(log.firstChild);
+  log.scrollTop=log.scrollHeight;
+}
+
+function renderMob(){
+  if(!state.currentMob){
+    document.getElementById('mob-name').textContent='...';
+    document.getElementById('mob-sprite').textContent='💨';
+    document.getElementById('mob-hp-text').textContent='--';
+    document.getElementById('mob-cb').textContent='';
+    document.getElementById('mob-hp-bar').style.width='0%';
+    return;
+  }
+  let mob=state.currentMob;
+  document.getElementById('mob-name').textContent=(mob.boss?'👑 ':'')+mob.name;
+  document.getElementById('mob-sprite').textContent=mob.sprite;
+  document.getElementById('mob-hp-text').textContent=`${state.mobHp}/${mob.maxHp} HP`;
+  document.getElementById('mob-cb').textContent=`Lv. ${mob.level}`;
+  document.getElementById('mob-hp-bar').style.width=(state.mobHp/mob.maxHp*100)+'%';
+  document.getElementById('mob-hp-bar').style.background=state.mobHp/mob.maxHp<0.25?'#ff2222':'#cc0000';
+  
+  document.getElementById('disp-atk').textContent=getStat('attack');
+  document.getElementById('disp-str').textContent=getStat('strength');
+  document.getElementById('disp-def').textContent=getStat('defence');
+  document.getElementById('disp-maxhit').textContent=getMaxHit();
+  document.getElementById('disp-acc').textContent=Math.round(getAccuracy()*100)+'%';
+}
+
+function renderSkills(){
+  let cont=document.getElementById('skills-list');
+  cont.innerHTML='';
+  state.skills.forEach(sk=>{
+    let pct=Math.round(xpProgress(sk)*100);
+    let row=document.createElement('div');
+    row.className='skill-row';
+    row.innerHTML=`<div class="skill-icon">${sk.icon}</div><div class="skill-info"><div class="skill-name">${sk.name.toUpperCase()}</div><div class="skill-level">${sk.level}</div><div class="skill-xpbar"><div class="skill-xpfill" style="width:${pct}%"></div></div></div>`;
+    cont.appendChild(row);
+  });
+}
+
+function updateTotalLevel(){
+  let total=state.skills.reduce((s,sk)=>s+sk.level,0);
+  document.getElementById('total-level-display').textContent=`Total Level: ${total}`;
+  document.getElementById('combat-level-display').textContent=`Combat: ${getCombatLevel()}`;
+}
+
+function renderPlayerStats(){
+  document.getElementById('player-hp-bar').style.width=(state.player.hp/state.player.maxHp*100)+'%';
+  document.getElementById('player-prayer-bar').style.width=(state.player.prayer/state.player.maxPrayer*100)+'%';
+  document.getElementById('hp-label-val').textContent=`${state.player.hp}/${state.player.maxHp}`;
+  document.getElementById('prayer-label-val').textContent=`${state.player.prayer}/${state.player.maxPrayer}`;
+  document.getElementById('gold-display').textContent=state.player.gold.toLocaleString();
+  
+  let statList=document.getElementById('player-stats-list');
+  statList.innerHTML=`
+    <div class="stat-row"><span class="slabel">Combat Lvl</span><span class="sval">${getCombatLevel()}</span></div>
+    <div class="stat-row"><span class="slabel">HP</span><span class="sval">${state.player.hp}/${state.player.maxHp}</span></div>
+    <div class="stat-row"><span class="slabel">Max Hit</span><span class="sval">${getMaxHit()}</span></div>
+    <div class="stat-row"><span class="slabel">Accuracy</span><span class="sval">${Math.round(getAccuracy()*100)}%</span></div>
+    <div class="stat-row"><span class="slabel">Gold</span><span class="sval">${state.player.gold.toLocaleString()}</span></div>
+    <div class="stat-row"><span class="slabel">Atk Bonus</span><span class="sval">+${getEquipBonus('atk')}</span></div>
+    <div class="stat-row"><span class="slabel">Str Bonus</span><span class="sval">+${getEquipBonus('str')}</span></div>
+    <div class="stat-row"><span class="slabel">Def Bonus</span><span class="sval">+${getEquipBonus('def')}</span></div>
+  `;
+}
+
+function renderMobList(){
+  let cont=document.getElementById('mob-list');
+  cont.innerHTML='';
+  let cbLvl=getCombatLevel();
+  MOBS.forEach(mob=>{
+    let locked=cbLvl<mob.reqCb;
+    let item=document.createElement('div');
+    item.className='mob-list-item'+(mob.id===state.selectedMobId?' selected':'');
+    if(locked){
+      item.innerHTML=`<div class="mob-sprite-sm">🔒</div><div class="mob-info-sm"><div class="mob-name-sm" style="color:#5a3a1a;">${mob.name}</div><div class="mob-level-sm">Req CB: ${mob.reqCb}</div></div>`;
+    } else {
+      item.innerHTML=`<div class="mob-sprite-sm">${mob.sprite}</div><div class="mob-info-sm"><div class="mob-name-sm">${mob.name}</div><div class="mob-level-sm">${mob.boss?'👑 BOSS ':''}Lv. ${mob.level}</div></div>`;
+      item.onclick=()=>{state.selectedMobId=mob.id;spawnMob();renderMobList();};
+    }
+    cont.appendChild(item);
+  });
+}
+
+function renderTraining(){
+  let grid=document.getElementById('training-grid');
+  grid.innerHTML='';
+  TRAINING_ACTIONS.forEach(action=>{
+    let sk=getSkill(action.skill);
+    let locked=sk.level<action.reqLevel;
+    let card=document.createElement('div');
+    card.className='train-card'+(state.idleTrain===action.id?' active':'')+(locked?' locked':'');
+    card.style.opacity=locked?'0.5':'1';
+    card.innerHTML=`<div class="train-icon">${action.icon}</div><div class="train-name">${action.name}</div><div class="train-desc">${action.desc}</div><div class="train-xp">+${action.xpPer} XP / action${locked?` (Req Lv.${action.reqLevel})`:''}</div>`;
+    if(!locked){
+      card.onclick=()=>{
+        if(state.idleTrain===action.id){state.idleTrain=null;document.getElementById('idle-train-label').textContent='🔨 Idle Training: None';}
+        else{state.idleTrain=action.id;document.getElementById('idle-train-label').textContent=`🔨 ${action.name}`;}
+        renderTraining();
+      };
+    }
+    grid.appendChild(card);
+  });
+}
+
+function renderEquipment(){
+  const SLOTS=[
+    {id:'head',label:'Head',row:0,col:1},
+    {id:'cape',label:'Cape',row:1,col:0},
+    {id:'neck',label:'Neck',row:1,col:1},
+    {id:'weapon',label:'Weapon',row:2,col:0},
+    {id:'body',label:'Body',row:2,col:1},
+    {id:'shield',label:'Shield',row:2,col:2},
+    {id:'legs',label:'Legs',row:3,col:1},
+    {id:'hands',label:'Hands',row:4,col:0},
+    {id:'feet',label:'Feet',row:4,col:1},
+  ];
+  let grid=document.getElementById('equip-slots');
+  grid.style.display='grid';
+  grid.style.gridTemplateColumns='repeat(3,52px)';
+  grid.style.gridTemplateRows='repeat(5,52px)';
+  grid.style.gap='2px';
+  grid.innerHTML='';
+  for(let r=0;r<5;r++)for(let c=0;c<3;c++){
+    let slot=SLOTS.find(s=>s.row===r&&s.col===c);
+    let div=document.createElement('div');
+    if(!slot){div.style.visibility='hidden';grid.appendChild(div);continue;}
+    div.className='equip-slot'+(state.equipment[slot.id]?'':' empty');
+    div.title=slot.label;
+    let item=state.equipment[slot.id];
+    div.textContent=item?item.icon:'·';
+    div.style.fontSize=item?'22px':'14px';
+    div.style.color=item?'':'#5a3a1a';
+    if(item){
+      div.onclick=()=>{
+        addToInventory({item:item.id,emoji:item.icon,count:1,itemObj:item});
+        state.equipment[slot.id]=null;
+        renderEquipment();renderPlayerStats();
+      };
+    }
+    grid.appendChild(div);
+  }
+  let bonuses=document.getElementById('equip-bonuses');
+  bonuses.innerHTML=`Atk Bonus: +${getEquipBonus('atk')} | Str Bonus: +${getEquipBonus('str')} | Def Bonus: +${getEquipBonus('def')}`;
+}
+
+function renderInventory(){
+  let cont=document.getElementById('inv-slots');
+  cont.innerHTML='';
+  for(let i=0;i<28;i++){
+    let slot=document.createElement('div');
+    slot.className='inv-slot';
+    let item=state.inventory[i];
+    if(item){
+      slot.textContent=item.emoji||'📦';
+      slot.title=item.item;
+      if(item.count>1){let c=document.createElement('div');c.className='inv-count';c.textContent=item.count;slot.appendChild(c);}
+      slot.onclick=()=>{useInventoryItem(i);};
+    }
+    cont.appendChild(slot);
+  }
+}
+
+function useInventoryItem(idx){
+  let item=state.inventory[idx];
+  if(!item)return;
+  let shopItem=SHOP_ITEMS.find(s=>s.id===item.item);
+  if(shopItem&&(shopItem.type==='weapon'||shopItem.type==='armour')){
+    let old=state.equipment[shopItem.slot];
+    state.equipment[shopItem.slot]=shopItem;
+    state.inventory.splice(idx,1);
+    if(old){addToInventory({item:old.id,emoji:old.icon,count:1});}
+    addLog(`Equipped ${shopItem.name}.`,'xp');
+    renderEquipment();renderPlayerStats();renderInventory();
+  } else if(shopItem&&shopItem.type==='food'){
+    let heal=shopItem.heal;
+    let actual=Math.min(heal,state.player.maxHp-state.player.hp);
+    state.player.hp+=actual;
+    item.count--;
+    if(item.count<=0)state.inventory.splice(idx,1);
+    addLog(`You eat the ${shopItem.name}. (Healed ${actual} HP)`,'xp');
+    renderPlayerStats();renderInventory();
+  }
+}
+
+function renderShop(){
+  let cont=document.getElementById('shop-items');
+  cont.innerHTML='';
+  SHOP_ITEMS.forEach(item=>{
+    let canAfford=state.player.gold>=item.cost;
+    let reqMet=!item.reqLevel||(item.slot==='weapon'?getStat('attack')>=item.reqLevel:getStat('defence')>=item.reqLevel);
+    let div=document.createElement('div');
+    div.className='shop-item';
+    div.style.opacity=(canAfford&&reqMet)?'1':'0.6';
+    div.innerHTML=`<div class="shop-item-icon">${item.icon}</div><div class="shop-item-info"><div class="shop-item-name">${item.name}</div><div class="shop-item-desc">${item.desc}${item.reqLevel?` (Req Lv.${item.reqLevel})`:''}</div></div><div class="shop-item-cost"><span>${item.cost.toLocaleString()}</span> gp</div>`;
+    if(canAfford&&reqMet){
+      div.onclick=()=>{
+        state.player.gold-=item.cost;
+        if(item.type==='food'||item.type==='potion'){
+          addToInventory({item:item.id,emoji:item.icon,count:1});
+          addLog(`Bought ${item.name}.`,'loot');
+        } else {
+          state.equipment[item.slot]=item;
+          addLog(`Bought and equipped ${item.name}.`,'loot');
+          renderEquipment();
+        }
+        renderPlayerStats();renderShop();renderInventory();
+      };
+    }
+    cont.appendChild(div);
+  });
+}
+
+function toggleAuto(){
+  state.autoCombat=!state.autoCombat;
+  document.getElementById('auto-combat-label').textContent='⚡ Auto-combat: '+(state.autoCombat?'ON':'OFF');
+  document.getElementById('auto-combat-label').style.color=state.autoCombat?'#88cc44':'#a07840';
+}
+
+function switchTab(id){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  let idx=['combat','train','equip','shop'].indexOf(id);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  if(id==='equip'){renderEquipment();renderInventory();}
+  if(id==='shop'){renderShop();}
+  if(id==='train'){renderTraining();}
+}
+
+// GAME LOOP
+let lastTick=Date.now();
+let trainTimer=0;
+let hpRegenTimer=0;
+
+function gameLoop(){
+  let now=Date.now();
+  let dt=(now-lastTick)/1000;
+  lastTick=now;
+
+  if(state.autoCombat&&state.currentMob&&state.mobHp>0&&state.player.hp>0){
+    state.combatTick+=dt;
+    if(state.combatTick>=2.4){
+      state.combatTick=0;
+      playerAttack();
+    }
+  }
+
+  hpRegenTimer+=dt;
+  if(hpRegenTimer>=10){
+    hpRegenTimer=0;
+    if(state.player.hp<state.player.maxHp){
+      state.player.hp=Math.min(state.player.maxHp,state.player.hp+1);
+      renderPlayerStats();
+    }
+  }
+
+  if(state.idleTrain){
+    trainTimer+=dt;
+    let action=TRAINING_ACTIONS.find(a=>a.id===state.idleTrain);
+    if(action&&trainTimer>=action.timeSec){
+      trainTimer=0;
+      let sk=getSkill(action.skill);
+      if(sk.level>=action.reqLevel){
+        addXp(action.skill,action.xpPer);
+        if(action.giveItem){
+          if(action.giveItem.item==='coins'){state.player.gold+=action.giveItem.count;renderPlayerStats();}
+          else addToInventory(action.giveItem);
+        }
+        document.getElementById('idle-status').textContent=`+${action.xpPer} ${action.skill} XP`;
+        setTimeout(()=>document.getElementById('idle-status').textContent='',600);
+      }
+    }
+  }
+
+  if(state.player.strBoostTimer>0){
+    state.player.strBoostTimer-=dt;
+    if(state.player.strBoostTimer<=0){state.player.strBoost=0;}
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+function init(){
+  spawnMob();
+  renderSkills();
+  renderMobList();
+  renderPlayerStats();
+  renderTraining();
+  updateTotalLevel();
+  addLog("Welcome to OldScape Idle! Click the monster to attack, or enable Auto-combat.",'');
+  addLog("Train non-combat skills in the Train tab. Buy gear in the Shop!",'');
+  gameLoop();
+}
+
+init();
+</script>
+</body>
+</html>
